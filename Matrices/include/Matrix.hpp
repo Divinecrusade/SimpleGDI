@@ -57,6 +57,26 @@ namespace Matrices
 
         ~Matrix() = default;
 
+        auto begin() noexcept -> decltype(data.begin())
+        {
+            return data.begin();
+        }
+        auto begin() const noexcept -> decltype(data.cbegin())
+        {
+            return data.cbegin();
+        }
+
+        auto end() noexcept -> decltype(data.end())
+        {
+            return data.end();
+        }
+        auto end() const noexcept -> decltype(data.cend())
+        {
+            return data.cend();
+        }
+        
+
+
         std::array<T, nRows> const& operator[](size_t i) const
         {
             assert(i <= nCols);

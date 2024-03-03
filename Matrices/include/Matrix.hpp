@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <utility>
 
 
 namespace Matrices
@@ -15,6 +16,11 @@ namespace Matrices
         return std::fabs(a - b) <= PRECISION;
     }
 
+    template<size_t nCols1, size_t nRows1, size_t nCols2, size_t nRows2>
+    concept MultableSizes = nCols1 == nRows2;
+
+    template<size_t nCols, size_t nRows>
+    concept SquareSizes = nCols == nRows;
 
     template<size_t nCols, size_t nRows, typename T = double>
     class Matrix
@@ -75,8 +81,6 @@ namespace Matrices
             return data.cend();
         }
         
-
-
         std::array<T, nRows> const& operator[](size_t i) const
         {
             assert(i <= nCols);
@@ -90,7 +94,7 @@ namespace Matrices
             return data[i];
         }
 
-        Matrix<nRows, nCols, T> operator!() const noexcept
+        Matrix<nCols, nRows, T> operator!() const noexcept
         {
             Matrix tmp{ };
 
@@ -104,6 +108,35 @@ namespace Matrices
             }
 
             return tmp.get_transpered();
+        }
+
+        Matrix<nCols, nRows, T>& operator+=(Matrix<nCols, nRows, T> const& rhs) noexcept
+        {
+            std::transform(lhs.begin(), lhs.end(), rhs.begin(), data.begin(),
+            [](auto const& col1, auto const& col2)
+            {
+                std::array<T, nRows> new_col{ };
+
+                std::transform(col1.begin(), col1.end(), col2.begin(), new_col.begin(), std::plus<T>{});
+
+                return new_col;
+            });
+
+            return *this;
+        }
+        Matrix<nCols, nRows, T>& operator-=(Matrix<nCols, nRows, T> const& rhs) noexcept
+        {
+            std::transform(lhs.begin(), lhs.end(), rhs.begin(), data.begin(),
+            [](auto const& col1, auto const& col2)
+            {
+                std::array<T, nRows> new_col{ };
+
+                std::transform(col1.begin(), col1.end(), col2.begin(), new_col.begin(), std::minus<T>{});
+
+                return new_col;
+            });
+
+            return *this;
         }
 
         std::array<std::array<T, nCols>, nRows> get_transpered() const noexcept
@@ -183,6 +216,36 @@ namespace Matrices
 
         std::array<std::array<T, nRows>, nCols> data;
     };
+
+
+    template<size_t nCols, size_t nRows, typename T>
+    Matrix<nCols, nRows, T> operator+(Matrix<nCols, nRows, T> const& lhs, Matrix<nCols, nRows, T> const& rhs) noexcept
+    {
+        return Matrix<nCols, nRows, T>{ lhs } += rhs;
+    }
+
+    template<size_t nCols, size_t nRows, typename T>
+    Matrix<nCols, nRows, T> operator-(Matrix<nCols, nRows, T> const& lhs, Matrix<nCols, nRows, T> const& rhs) noexcept
+    {
+        return Matrix<nCols, nRows, T>{ lhs } -= rhs;
+    }
+
+    template<size_t nCols, size_t nCols2, size_t nRows, typename T>
+    Matrix<nCols, nRows, T> operator*(Matrix<nCols, nRows, T> const& lhs, Matrix<nCols2, nCols, T> const& rhs) noexcept
+    {
+        Matrix<nCols, nRows, T> result{ };
+
+        for (size_t i{ 0U }; i != nCols; ++i)
+        for (size_t j{ 0U }; j != nRows; ++j)
+        {
+            result[i][j] = static_cast<T>(0);
+
+            for (size_t k{ 0U }; k != nCols2; ++k)
+                result += lhs[i][k] * rhs[k][j];
+        }
+
+        return result;
+    }
 }
 
 #endif // !MATRIX

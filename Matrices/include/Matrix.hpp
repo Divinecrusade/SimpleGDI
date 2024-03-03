@@ -32,13 +32,13 @@ namespace Matrices
     public:
 
         constexpr Matrix() noexcept = default;
-        constexpr Matrix(std::array<std::array<T, nRows>, nCols> const& data) noexcept
+        constexpr Matrix(std::array<std::array<T, nCols>, nRows> const& data) noexcept
         :
         data{ data }
         { }
-        Matrix(std::array<std::array<T, nRows>, nCols>&& tmp_data) noexcept
+        Matrix(std::array<std::array<T, nCols>, nRows>&& tmp_data) noexcept
         :
-        data{ data }
+        data{ tmp_data }
         { }
         constexpr Matrix(Matrix const& matrix) noexcept
         :

@@ -18,8 +18,11 @@ void print_matrix(Matrix<nCols, nRows, T> const& matrix)
 int main()
 {
     Matrix<3, 1> M1{ };
+    Matrix<3, 1> M2{ {1.0, 2.0, 3.0} };
 
     print_matrix(M1);
+    std::cout << "\n";
+    print_matrix(M2);
 
     return 0;
 }

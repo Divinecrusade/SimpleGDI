@@ -16,11 +16,11 @@ namespace Matrices
         return std::fabs(a - b) <= PRECISION;
     }
 
-    /*template<size_t nCols1, size_t nRows1, size_t nCols2, size_t nRows2>
+    template<size_t nCols1, size_t nRows1, size_t nCols2, size_t nRows2>
     concept MultableSizes = nCols1 == nRows2;
 
     template<size_t nCols, size_t nRows>
-    concept SquareSizes = nCols == nRows;*/
+    concept SquareSizes = nCols == nRows;
 
     template<size_t nRows, size_t nCols, typename T = double>
     class Matrix
@@ -142,6 +142,22 @@ namespace Matrices
 
             return *this;
         }
+        template<size_t nRows2, size_t nCols2>
+        requires MultableSizes<nRows, nCols, nRows2, nCols2> && SquareSizes<nRows, nCols>
+        Matrix& operator*=(Matrix<nRows2, nCols2, T> const& rhs) noexcept
+        {
+            return (*this) = Matrix{ *this } * rhs;
+        }
+        Matrix& operator*=(T const& k) noexcept
+        {
+            for (auto& row : (*this))
+            for (auto& col : row)
+            {
+                col *= k;
+            }
+
+            return *this;
+        }
 
         Matrix<nCols, nRows, T> get_transpered() const noexcept
         {
@@ -243,6 +259,18 @@ namespace Matrices
         }
 
         return result;
+    }
+    
+    template<size_t nRows, size_t nCols, typename T>
+    Matrix<nRows, nCols, T> operator*(Matrix<nRows, nCols, T> const& lhs, T const& rhs)
+    {
+        return Matrix{ lhs } *= rhs;
+    }
+
+    template<size_t nRows, size_t nCols, typename T>
+    Matrix<nRows, nCols, T> operator*(T const& lhs, Matrix<nRows, nCols, T> const& rhs)
+    {
+        return Matrix{ rhs } *= lhs;
     }
 }
 

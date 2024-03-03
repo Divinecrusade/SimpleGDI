@@ -47,7 +47,13 @@ int main()
     auto M5{ !M4 };
     print_matrix(M5);
     std::cout << "\n";
-    print_matrix(M4 * M5);
+    print_matrix(M4 *= M5);
+    std::cout << "\n";
+    print_matrix(M3 *= 2.);
+    std::cout << "\n";
+    print_matrix(M3 * (1./2));
+    std::cout << "\n";
+    print_matrix((1./2) * M3);
 
     return 0;
 }

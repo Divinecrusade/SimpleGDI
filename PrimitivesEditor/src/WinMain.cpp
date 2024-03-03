@@ -14,6 +14,13 @@ void show_error(wchar_t const* const msg, wchar_t const* const caption)
     MessageBoxW(NULL, msg, caption, NULL);
 }
 
+SIZE get_window_size(HWND hWnd)
+{
+    RECT wnd_area{ };
+    GetClientRect(hWnd, &wnd_area);
+
+    return SIZE{ wnd_area.right - wnd_area.left, wnd_area.bottom - wnd_area.top };
+}
 
 LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {

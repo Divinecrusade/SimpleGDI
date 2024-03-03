@@ -11,20 +11,24 @@
 namespace Matrices
 {
     static constexpr double PRECISION{ 1e-7 };
-    __forceinline constexpr bool is_equal_with_precision(double a, double b)
+    __forceinline bool is_equal_with_precision(double a, double b)
     {
         return std::fabs(a - b) <= PRECISION;
     }
 
-    template<size_t nCols1, size_t nRows1, size_t nCols2, size_t nRows2>
+    /*template<size_t nCols1, size_t nRows1, size_t nCols2, size_t nRows2>
     concept MultableSizes = nCols1 == nRows2;
 
     template<size_t nCols, size_t nRows>
-    concept SquareSizes = nCols == nRows;
+    concept SquareSizes = nCols == nRows;*/
 
     template<size_t nCols, size_t nRows, typename T = double>
     class Matrix
     {
+    private:
+
+        std::array<std::array<T, nCols>, nRows> data;
+
     public:
 
         constexpr Matrix() noexcept = default;
@@ -38,7 +42,7 @@ namespace Matrices
         { }
         constexpr Matrix(Matrix const& matrix) noexcept
         :
-        matrix{ matrix }
+        data{ matrix.data }
         { }
         Matrix(Matrix&& tmp_matrix) noexcept
         {
@@ -112,7 +116,7 @@ namespace Matrices
 
         Matrix<nCols, nRows, T>& operator+=(Matrix<nCols, nRows, T> const& rhs) noexcept
         {
-            std::transform(lhs.begin(), lhs.end(), rhs.begin(), data.begin(),
+            std::transform(data.begin(), data.end(), rhs.begin(), data.begin(),
             [](auto const& col1, auto const& col2)
             {
                 std::array<T, nRows> new_col{ };
@@ -126,7 +130,7 @@ namespace Matrices
         }
         Matrix<nCols, nRows, T>& operator-=(Matrix<nCols, nRows, T> const& rhs) noexcept
         {
-            std::transform(lhs.begin(), lhs.end(), rhs.begin(), data.begin(),
+            std::transform(data.begin(), data.end(), rhs.begin(), data.begin(),
             [](auto const& col1, auto const& col2)
             {
                 std::array<T, nRows> new_col{ };
@@ -200,7 +204,7 @@ namespace Matrices
 
             for (size_t i1{ 0U }, i2{ 0U }; i2 < nCols - 1U; ++i1, ++i2)
             {
-                if (i1 == I) ++i;
+                if (i1 == I) ++i1;
 
                 for (size_t j1{ 0U }, j2{ 0U }; j2 < nRows - 1U; ++j1, ++j2)
                 {
@@ -211,10 +215,6 @@ namespace Matrices
 
             return pow(-1., I + J) * minor_matrix.get_determinant();
         }
-
-    private:
-
-        std::array<std::array<T, nRows>, nCols> data;
     };
 
 

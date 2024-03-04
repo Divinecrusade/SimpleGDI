@@ -22,10 +22,33 @@ SIZE get_window_size(HWND hWnd)
     return SIZE{ wnd_area.right - wnd_area.left, wnd_area.bottom - wnd_area.top };
 }
 
+__forceinline static POINT get_cursor_pos_on_screen() noexcept
+{
+    POINT global_cursor_pos{ };
+
+    GetCursorPos(&global_cursor_pos);
+
+    return global_cursor_pos;
+}
+
+__forceinline POINT get_cursor_pos_on_window(HWND hWnd) noexcept
+{
+    POINT cursor_pos{ get_cursor_pos_on_screen() };
+
+    ScreenToClient(hWnd, &cursor_pos);
+
+    return cursor_pos;
+}
+
+__forceinline POINT get_cursor_pos_on_window(LPARAM lParam) noexcept
+{
+    return POINT{ static_cast<long>(lParam % 0x10000LL), static_cast<long>(lParam / 0x10000LL) };
+}
+
 LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
-    PAINTSTRUCT ps{ };
-    HDC hdc{ };
+    static PAINTSTRUCT ps{ };
+    static HDC hdc{ };
 
     switch (message)
     {

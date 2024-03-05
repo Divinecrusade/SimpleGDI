@@ -63,7 +63,7 @@ namespace AppParams
     namespace Button
     {
         static constexpr auto BACKGROUND_COLOR{ RGB(255, 255, 255) };
-        static constexpr int  WIDTH { 100 };
+        static constexpr int  WIDTH { 125 };
         static constexpr int  HEIGHT{ 80 };
         static constexpr int  N{ 4 };
         static constexpr int  Y_MARGIN{ (Menu::HEIGHT - HEIGHT) / 2 };
@@ -73,13 +73,6 @@ namespace AppParams
         {
             std::array<RECT, N> regions{ };
 
-            regions[0] =
-            { 
-                Menu::REGION.left, 
-                Menu::REGION.top + Y_MARGIN, 
-                Menu::REGION.left + WIDTH, 
-                Menu::REGION.top + Y_MARGIN + HEIGHT
-            };
             for (int i{ 0 }; i != N; ++i)
             {
                 regions[i] = 

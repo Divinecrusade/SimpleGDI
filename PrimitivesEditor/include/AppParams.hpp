@@ -2,6 +2,7 @@
 #define APPPARAMS
 
 #include <Windows.h>
+#include <windowsx.h>
 #include <WinUser.h>
 
 #include <array>

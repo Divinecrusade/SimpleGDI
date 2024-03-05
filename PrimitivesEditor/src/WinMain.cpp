@@ -16,7 +16,7 @@ void show_error(wchar_t const* const msg, wchar_t const* const caption)
 
 __forceinline POINT get_cursor_pos_on_window(LPARAM lParam) noexcept
 {
-    return POINT{ static_cast<long>(LOWORD(lParam)), static_cast<long>(HIWORD(lParam)) };
+    return POINT{ static_cast<long>(GET_X_LPARAM(lParam)), static_cast<long>(GET_Y_LPARAM(lParam)) };
 }
 
 LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, _In_ LPARAM lParam)
@@ -29,8 +29,6 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
     
     static HBRUSH const CANVAS_BACKGROUND_BRUSH{ CreateSolidBrush(AppParams::Canvas::BACKGROUND_COLOR) };
     static HBRUSH const BTN_BACKGROUND_BRUSH   { CreateSolidBrush(AppParams::Button::BACKGROUND_COLOR) };
-
-    static bool LB_pressed{ false };
 
     static POINT line_beg{ };
     static POINT line_end{ };
@@ -58,14 +56,13 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
         case WM_LBUTTONDOWN:
         {
-            LB_pressed = true;
             line_beg = line_end = get_cursor_pos_on_window(lParam);
         }
         break;
 
         case WM_MOUSEMOVE:
         {
-            if (LB_pressed)
+            if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
             {
                 hdc = GetDC(hWnd);
 
@@ -89,8 +86,6 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
         case WM_LBUTTONUP:
         {
-            LB_pressed = false;
-
             hdc = GetDC(hWnd);
 
             SelectObject(hdc, RUBBER_LINE_PEN);

@@ -67,6 +67,8 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
                     ReleaseDC(hWnd, hdc);
                 }
+                break;
+
                 default: return DefWindowProcW(hWnd, message, wParam, lParam); break;
             }
         }

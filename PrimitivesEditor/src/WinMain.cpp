@@ -6,7 +6,6 @@
 
 #include <AppParams.hpp>
 
-#include <WinUser.h>
 #include <cwchar>
 
 
@@ -25,11 +24,11 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
     static HDC hdc{ };
 
     static HPEN const CANVAS_BORDER_PEN{ CreatePen(AppParams::Canvas::BORDER_STYLE, AppParams::Canvas::BORDER_WIDTH, AppParams::Canvas::BORDER_COLOR) };
-    static HPEN const RUBBER_LINE_PEN{ CreatePen(AppParams::RubberLine::STYLE, AppParams::RubberLine::WIDTH, AppParams::RubberLine::COLOR) };
-    static HPEN const SOLID_LINE_PEN{ CreatePen(AppParams::Line::STYLE, AppParams::Line::WIDTH, AppParams::Line::COLOR) };
+    static HPEN const RUBBER_LINE_PEN  { CreatePen(AppParams::RubberLine::STYLE, AppParams::RubberLine::WIDTH, AppParams::RubberLine::COLOR) };
+    static HPEN const SOLID_LINE_PEN   { CreatePen(AppParams::Line::STYLE, AppParams::Line::WIDTH, AppParams::Line::COLOR) };
     
     static HBRUSH const CANVAS_BACKGROUND_BRUSH{ CreateSolidBrush(AppParams::Canvas::BACKGROUND_COLOR) };
-    static HBRUSH const BTN_BACKGROUND_BRUSH{ CreateSolidBrush(AppParams::Button::BACKGROUND_COLOR) };
+    static HBRUSH const BTN_BACKGROUND_BRUSH   { CreateSolidBrush(AppParams::Button::BACKGROUND_COLOR) };
 
     static bool LB_pressed{ false };
 
@@ -39,84 +38,81 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
     switch (message)
     {
-    case WM_PAINT:
-    {
-        PAINTSTRUCT ps{ };
-        hdc = BeginPaint(hWnd, &ps);
-
-        SelectObject(hdc, CANVAS_BORDER_PEN);
-        Rectangle(hdc, AppParams::Canvas::REGION.left, AppParams::Canvas::REGION.top, AppParams::Canvas::REGION.right, AppParams::Canvas::REGION.bottom);
-        FillRect(hdc, &AppParams::Canvas::REGION, CANVAS_BACKGROUND_BRUSH);
-
-        for (auto& rect : AppParams::Button::REGIONS)
+        case WM_PAINT:
         {
-            FillRect(hdc, &rect, BTN_BACKGROUND_BRUSH);
+            PAINTSTRUCT ps{ };
+            hdc = BeginPaint(hWnd, &ps);
+
+            SelectObject(hdc, CANVAS_BORDER_PEN);
+            Rectangle(hdc, AppParams::Canvas::REGION.left, AppParams::Canvas::REGION.top, AppParams::Canvas::REGION.right, AppParams::Canvas::REGION.bottom);
+            FillRect(hdc, &AppParams::Canvas::REGION, CANVAS_BACKGROUND_BRUSH);
+
+            for (auto& rect : AppParams::Button::REGIONS)
+            {
+                FillRect(hdc, &rect, BTN_BACKGROUND_BRUSH);
+            }
+
+            EndPaint(hWnd, &ps);
         }
+        break;
 
-        EndPaint(hWnd, &ps);
-    }
-    break;
-
-    case WM_LBUTTONDOWN:
-    {
-        LB_pressed = true;
-        line_beg = line_end = get_cursor_pos_on_window(lParam);
-    }
-    break;
-
-    case WM_MOUSEMOVE:
-
-        if (LB_pressed)
+        case WM_LBUTTONDOWN:
         {
+            LB_pressed = true;
+            line_beg = line_end = get_cursor_pos_on_window(lParam);
+        }
+        break;
+
+        case WM_MOUSEMOVE:
+        {
+            if (LB_pressed)
+            {
+                hdc = GetDC(hWnd);
+
+                SelectObject(hdc, RUBBER_LINE_PEN);
+                auto const OLD_ROP{ GetROP2(hdc) };
+                SetROP2(hdc, AppParams::RubberLine::ROP);
+
+                MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
+                LineTo(hdc, line_end.x, line_end.y);
+
+                line_end = get_cursor_pos_on_window(lParam);
+
+                MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
+                LineTo(hdc, line_end.x, line_end.y);
+
+                SetROP2(hdc, OLD_ROP);
+                ReleaseDC(hWnd, hdc);
+            }
+        }
+        break;
+
+        case WM_LBUTTONUP:
+        {
+            LB_pressed = false;
+
             hdc = GetDC(hWnd);
 
             SelectObject(hdc, RUBBER_LINE_PEN);
-            SetROP2(hdc, R2_XORPEN);
+            auto const OLD_ROP{ GetROP2(hdc) };
+            SetROP2(hdc, AppParams::RubberLine::ROP);
 
             MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
             LineTo(hdc, line_end.x, line_end.y);
 
-            line_end = get_cursor_pos_on_window(lParam);
+            SelectObject(hdc, SOLID_LINE_PEN);
+            SetROP2(hdc, AppParams::Line::ROP);
 
             MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
             LineTo(hdc, line_end.x, line_end.y);
 
-            SetROP2(hdc, R2_COPYPEN);
-
+            SetROP2(hdc, OLD_ROP);
             ReleaseDC(hWnd, hdc);
         }
-
-    break;
-
-    case WM_LBUTTONUP:
-    {
-        LB_pressed = false;
-
-        hdc = GetDC(hWnd);
-
-        SelectObject(hdc, RUBBER_LINE_PEN);
-        SetROP2(hdc, R2_XORPEN);
-
-        MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
-        LineTo(hdc, line_end.x, line_end.y);
-
-        SelectObject(hdc, SOLID_LINE_PEN);
-        SetROP2(hdc, R2_COPYPEN);
-
-        MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
-        LineTo(hdc, line_end.x, line_end.y);
-
-        ReleaseDC(hWnd, hdc);
-    }
-    break;
-
-    case WM_DESTROY:
-        PostQuitMessage(EXIT_SUCCESS);
         break;
 
-    default:
-        return DefWindowProcW(hWnd, message, wParam, lParam);
-        break;
+        case WM_DESTROY: PostQuitMessage(EXIT_SUCCESS); break;
+        default: return DefWindowProcW(hWnd, message, wParam, lParam); break;
     }
 
     return EXIT_SUCCESS;

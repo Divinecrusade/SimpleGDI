@@ -2,6 +2,8 @@
 #define APPPARAMS
 
 #include <Windows.h>
+#include <WinUser.h>
+
 #include <array>
 
 
@@ -9,16 +11,18 @@ namespace AppParams
 {
     namespace RubberLine
     {
-        static constexpr auto COLOR{ RGB(255, 255, 255) };
         static constexpr auto STYLE{ PS_SOLID };
         static constexpr int  WIDTH{ 1 };
+        static constexpr auto COLOR{ RGB(255, 255, 255) };
+        static constexpr auto ROP  { R2_XORPEN };
     }
 
     namespace Line
     {
-        static constexpr auto COLOR{ RGB(255, 0, 0) };
         static constexpr auto STYLE{ PS_SOLID };
         static constexpr int  WIDTH{ 2 };
+        static constexpr auto COLOR{ RGB(255, 0, 0) };
+        static constexpr auto ROP  { R2_COPYPEN };
     }
 
     namespace Canvas

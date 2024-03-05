@@ -62,24 +62,27 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
         case WM_MOUSEMOVE:
         {
-            if (wParam == VK_LBUTTON)
+            switch(wParam) 
             {
-                hdc = GetDC(hWnd);
+                case VK_LBUTTON:
+                {
+                    hdc = GetDC(hWnd);
 
-                SelectObject(hdc, RUBBER_LINE_PEN);
-                auto const OLD_ROP{ GetROP2(hdc) };
-                SetROP2(hdc, AppParams::RubberLine::ROP);
+                    SelectObject(hdc, RUBBER_LINE_PEN);
+                    auto const OLD_ROP{ GetROP2(hdc) };
+                    SetROP2(hdc, AppParams::RubberLine::ROP);
 
-                MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
-                LineTo(hdc, line_end.x, line_end.y);
+                    MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
+                    LineTo(hdc, line_end.x, line_end.y);
 
-                line_end = get_cursor_pos_on_window(lParam);
+                    line_end = get_cursor_pos_on_window(lParam);
 
-                MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
-                LineTo(hdc, line_end.x, line_end.y);
+                    MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
+                    LineTo(hdc, line_end.x, line_end.y);
 
-                SetROP2(hdc, OLD_ROP);
-                ReleaseDC(hWnd, hdc);
+                    SetROP2(hdc, OLD_ROP);
+                    ReleaseDC(hWnd, hdc);
+                }
             }
         }
         break;

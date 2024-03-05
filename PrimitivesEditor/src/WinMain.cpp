@@ -4,7 +4,7 @@
 #define DEBUG
 #define _DEBUG
 
-#include <AppParams.hpp>
+#include "View.hpp"
 
 #include <cwchar>
 
@@ -23,13 +23,7 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 {
     static HDC hdc{ };
 
-    static HPEN const CANVAS_BORDER_PEN{ CreatePen(AppParams::Canvas::BORDER_STYLE, AppParams::Canvas::BORDER_WIDTH, AppParams::Canvas::BORDER_COLOR) };
-    static HPEN const RUBBER_LINE_PEN  { CreatePen(AppParams::RubberLine::STYLE, AppParams::RubberLine::WIDTH, AppParams::RubberLine::COLOR) };
-    static HPEN const SOLID_LINE_PEN   { CreatePen(AppParams::Line::STYLE, AppParams::Line::WIDTH, AppParams::Line::COLOR) };
-    
-    static HBRUSH const CANVAS_BACKGROUND_BRUSH{ CreateSolidBrush(AppParams::Canvas::BACKGROUND_COLOR) };
-    static HBRUSH const BTN_BACKGROUND_BRUSH   { CreateSolidBrush(AppParams::Button::BACKGROUND_COLOR) };
-
+    static View renderer{ };
     static POINT line_beg{ };
     static POINT line_end{ };
 
@@ -41,14 +35,8 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
             PAINTSTRUCT ps{ };
             hdc = BeginPaint(hWnd, &ps);
 
-            SelectObject(hdc, CANVAS_BORDER_PEN);
-            Rectangle(hdc, AppParams::Canvas::REGION.left, AppParams::Canvas::REGION.top, AppParams::Canvas::REGION.right, AppParams::Canvas::REGION.bottom);
-            FillRect(hdc, &AppParams::Canvas::REGION, CANVAS_BACKGROUND_BRUSH);
-
-            for (auto& rect : AppParams::Button::REGIONS)
-            {
-                FillRect(hdc, &rect, BTN_BACKGROUND_BRUSH);
-            }
+            renderer.update_context(hdc);
+            renderer.draw_stage();
 
             EndPaint(hWnd, &ps);
         }
@@ -68,19 +56,15 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
                 {
                     hdc = GetDC(hWnd);
 
-                    SelectObject(hdc, RUBBER_LINE_PEN);
-                    auto const OLD_ROP{ GetROP2(hdc) };
-                    SetROP2(hdc, AppParams::RubberLine::ROP);
+                    renderer.update_context(hdc);
+                    renderer.set_clipping();
 
-                    MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
-                    LineTo(hdc, line_end.x, line_end.y);
+                    renderer.draw_rubber_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y });
 
                     line_end = get_cursor_pos_on_window(lParam);
 
-                    MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
-                    LineTo(hdc, line_end.x, line_end.y);
+                    renderer.draw_rubber_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y });
 
-                    SetROP2(hdc, OLD_ROP);
                     ReleaseDC(hWnd, hdc);
                 }
                 default: return DefWindowProcW(hWnd, message, wParam, lParam); break;
@@ -92,20 +76,12 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
         {
             hdc = GetDC(hWnd);
 
-            SelectObject(hdc, RUBBER_LINE_PEN);
-            auto const OLD_ROP{ GetROP2(hdc) };
-            SetROP2(hdc, AppParams::RubberLine::ROP);
+            renderer.update_context(hdc);
+            renderer.set_clipping();
 
-            MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
-            LineTo(hdc, line_end.x, line_end.y);
+            renderer.draw_rubber_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y });
+            renderer.draw_solid_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y });
 
-            SelectObject(hdc, SOLID_LINE_PEN);
-            SetROP2(hdc, AppParams::Line::ROP);
-
-            MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
-            LineTo(hdc, line_end.x, line_end.y);
-
-            SetROP2(hdc, OLD_ROP);
             ReleaseDC(hWnd, hdc);
         }
         break;

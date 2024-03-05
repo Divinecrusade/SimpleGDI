@@ -8,56 +8,111 @@
 #include <WinUser.h>
 #include <cwchar>
 
+static constexpr int CANVAS_WIDTH{ 600 };
+static constexpr int CANVAS_HEIGHT{ CANVAS_WIDTH };
+static constexpr int MENU_HEIGHT{ 100 };
+static constexpr RECT PADDING{ 15, MENU_HEIGHT, 15, 15 };
+static constexpr RECT CANVAS_REGION{ PADDING.left, PADDING.top, PADDING.left + CANVAS_WIDTH, PADDING.top + CANVAS_HEIGHT };
+
+static constexpr int WINDOW_WIDTH{ CANVAS_WIDTH + PADDING.left + PADDING.right };
+static constexpr int WINDOW_HEIGHT{ CANVAS_HEIGHT + PADDING.top + PADDING.bottom };
+
+static constexpr auto CANVAS_BORDER_COLOR{ RGB(0, 0, 255) };
+static constexpr auto CANVAS_BORDER_STYLE{ PS_SOLID };
+static constexpr auto CANVAS_BORDER_WIDTH{ 4 };
+static constexpr auto CANVAS_BACKGROUND_COLOR{ RGB(0, 0, 0) };
+
+static constexpr auto LINE_COLOR{ RGB(255, 255, 255) };
+static constexpr auto LINE_STYLE{ PS_SOLID };
+static constexpr auto LINE_WIDTH{ 2 };
+
 
 void show_error(wchar_t const* const msg, wchar_t const* const caption)
 {
     MessageBoxW(NULL, msg, caption, NULL);
 }
 
-SIZE get_window_size(HWND hWnd)
-{
-    RECT wnd_area{ };
-    GetClientRect(hWnd, &wnd_area);
-
-    return SIZE{ wnd_area.right - wnd_area.left, wnd_area.bottom - wnd_area.top };
-}
-
-__forceinline static POINT get_cursor_pos_on_screen() noexcept
-{
-    POINT global_cursor_pos{ };
-
-    GetCursorPos(&global_cursor_pos);
-
-    return global_cursor_pos;
-}
-
-__forceinline POINT get_cursor_pos_on_window(HWND hWnd) noexcept
-{
-    POINT cursor_pos{ get_cursor_pos_on_screen() };
-
-    ScreenToClient(hWnd, &cursor_pos);
-
-    return cursor_pos;
-}
-
 __forceinline POINT get_cursor_pos_on_window(LPARAM lParam) noexcept
 {
-    return POINT{ static_cast<long>(lParam % 0x10000LL), static_cast<long>(lParam / 0x10000LL) };
+    return POINT{ static_cast<long>(LOWORD(lParam)), static_cast<long>(HIWORD(lParam)) };
 }
 
 LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
-    static PAINTSTRUCT ps{ };
     static HDC hdc{ };
+
+    static HPEN const CANVAS_BORDER_PEN{ CreatePen(CANVAS_BORDER_STYLE, CANVAS_BORDER_WIDTH, CANVAS_BORDER_COLOR) };
+    static HPEN const LINE_PEN{ CreatePen(LINE_STYLE, LINE_WIDTH, LINE_COLOR) };
+    
+    static HBRUSH const CANVAS_BACKGROUND_BRUSH{ CreateSolidBrush(CANVAS_BACKGROUND_COLOR) };
+
+    static bool LB_pressed{ false };
+
+    static POINT line_beg{ };
+    static POINT line_end{ };
+
 
     switch (message)
     {
     case WM_PAINT:
+    {
+        PAINTSTRUCT ps{ };
         hdc = BeginPaint(hWnd, &ps);
 
-        EndPaint(hWnd, &ps);
+        SelectObject(hdc, CANVAS_BORDER_PEN);
+        Rectangle(hdc, CANVAS_REGION.left, CANVAS_REGION.top, CANVAS_REGION.right, CANVAS_REGION.bottom);
+        FillRect(hdc, &CANVAS_REGION, CANVAS_BACKGROUND_BRUSH);
 
-        break;
+        EndPaint(hWnd, &ps);
+    }
+    break;
+
+    case WM_LBUTTONDOWN:
+    {
+        LB_pressed = true;
+        line_beg = line_end = get_cursor_pos_on_window(lParam);
+    }
+    break;
+
+    case WM_MOUSEMOVE:
+
+        if (LB_pressed)
+        {
+            hdc = GetDC(hWnd);
+
+            SelectObject(hdc, LINE_PEN);
+            SetROP2(hdc, R2_XORPEN);
+
+            MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
+            LineTo(hdc, line_end.x, line_end.y);
+
+            line_end = get_cursor_pos_on_window(lParam);
+
+            MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
+            LineTo(hdc, line_end.x, line_end.y);
+
+            SetROP2(hdc, R2_COPYPEN);
+
+            ReleaseDC(hWnd, hdc);
+        }
+
+    break;
+
+    case WM_LBUTTONUP:
+    {
+        LB_pressed = false;
+
+        hdc = GetDC(hWnd);
+
+        SelectObject(hdc, LINE_PEN);
+        SetROP2(hdc, R2_COPYPEN);
+
+        MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
+        LineTo(hdc, line_end.x, line_end.y);
+
+        ReleaseDC(hWnd, hdc);
+    }
+    break;
 
     case WM_DESTROY:
         PostQuitMessage(EXIT_SUCCESS);
@@ -73,18 +128,17 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
-    constexpr wchar_t const* WND_CLASS_NAME{ L"Simple Desktop App" };
-    constexpr wchar_t const* WINDOW_TITLE  { L"Primitives Editor" };
+    constexpr wchar_t const* WND_CLASS_NAME   { L"Simple Desktop App" };
+    constexpr wchar_t const* CANVAS_CLASS_NAME{ L"Canvas" };
+    constexpr wchar_t const* WINDOW_TITLE     { L"Primitives Editor" };
 
-    constexpr int WINDOW_INIT_POS_X{ 300 };
+    constexpr int WINDOW_INIT_POS_X{ 100 };
     constexpr int WINDOW_INIT_POS_Y{ 100 };
-    static constexpr int WINDOW_WIDTH{ 600 };
-    static constexpr int WINDOW_HEIGHT{ WINDOW_WIDTH };
+    
 
-
-    WNDCLASSEXW const wcex
+    WNDCLASSEXW const window_class
     {
-        sizeof(wcex),
+        sizeof(window_class),
         CS_HREDRAW | CS_VREDRAW,
         WndProc,
         0,
@@ -92,13 +146,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR lpCm
         hInstance,
         LoadIconW(hInstance, IDI_APPLICATION),
         LoadCursorW(NULL, IDC_ARROW),
-        (HBRUSH)(COLOR_WINDOW + 1),
+        (HBRUSH)(COLOR_WINDOW + 2),
         NULL,
         WND_CLASS_NAME,
         LoadIconW(hInstance, IDI_APPLICATION)
     };
 
-    if (!RegisterClassExW(&wcex))
+    if (!RegisterClassExW(&window_class))
     {
         show_error(L"Call to RegisterClassEx failed!", WINDOW_TITLE);
 
@@ -135,7 +189,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR lpCm
         
         return EXIT_FAILURE;
     }
-
+    
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
 

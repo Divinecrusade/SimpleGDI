@@ -4,27 +4,10 @@
 #define DEBUG
 #define _DEBUG
 
-#include <Windows.h>
+#include <AppParams.hpp>
+
 #include <WinUser.h>
 #include <cwchar>
-
-static constexpr int CANVAS_WIDTH{ 600 };
-static constexpr int CANVAS_HEIGHT{ CANVAS_WIDTH };
-static constexpr int MENU_HEIGHT{ 100 };
-static constexpr RECT PADDING{ 15, MENU_HEIGHT, 15, 15 };
-static constexpr RECT CANVAS_REGION{ PADDING.left, PADDING.top, PADDING.left + CANVAS_WIDTH, PADDING.top + CANVAS_HEIGHT };
-
-static constexpr int WINDOW_WIDTH{ CANVAS_WIDTH + PADDING.left + PADDING.right };
-static constexpr int WINDOW_HEIGHT{ CANVAS_HEIGHT + PADDING.top + PADDING.bottom };
-
-static constexpr auto CANVAS_BORDER_COLOR{ RGB(0, 0, 255) };
-static constexpr auto CANVAS_BORDER_STYLE{ PS_SOLID };
-static constexpr auto CANVAS_BORDER_WIDTH{ 4 };
-static constexpr auto CANVAS_BACKGROUND_COLOR{ RGB(0, 0, 0) };
-
-static constexpr auto LINE_COLOR{ RGB(255, 255, 255) };
-static constexpr auto LINE_STYLE{ PS_SOLID };
-static constexpr auto LINE_WIDTH{ 2 };
 
 
 void show_error(wchar_t const* const msg, wchar_t const* const caption)
@@ -41,10 +24,12 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 {
     static HDC hdc{ };
 
-    static HPEN const CANVAS_BORDER_PEN{ CreatePen(CANVAS_BORDER_STYLE, CANVAS_BORDER_WIDTH, CANVAS_BORDER_COLOR) };
-    static HPEN const LINE_PEN{ CreatePen(LINE_STYLE, LINE_WIDTH, LINE_COLOR) };
+    static HPEN const CANVAS_BORDER_PEN{ CreatePen(AppParams::Canvas::BORDER_STYLE, AppParams::Canvas::BORDER_WIDTH, AppParams::Canvas::BORDER_COLOR) };
+    static HPEN const RUBBER_LINE_PEN{ CreatePen(AppParams::RubberLine::STYLE, AppParams::RubberLine::WIDTH, AppParams::RubberLine::COLOR) };
+    static HPEN const SOLID_LINE_PEN{ CreatePen(AppParams::Line::STYLE, AppParams::Line::WIDTH, AppParams::Line::COLOR) };
     
-    static HBRUSH const CANVAS_BACKGROUND_BRUSH{ CreateSolidBrush(CANVAS_BACKGROUND_COLOR) };
+    static HBRUSH const CANVAS_BACKGROUND_BRUSH{ CreateSolidBrush(AppParams::Canvas::BACKGROUND_COLOR) };
+    static HBRUSH const BTN_BACKGROUND_BRUSH{ CreateSolidBrush(AppParams::Button::BACKGROUND_COLOR) };
 
     static bool LB_pressed{ false };
 
@@ -60,8 +45,13 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
         hdc = BeginPaint(hWnd, &ps);
 
         SelectObject(hdc, CANVAS_BORDER_PEN);
-        Rectangle(hdc, CANVAS_REGION.left, CANVAS_REGION.top, CANVAS_REGION.right, CANVAS_REGION.bottom);
-        FillRect(hdc, &CANVAS_REGION, CANVAS_BACKGROUND_BRUSH);
+        Rectangle(hdc, AppParams::Canvas::REGION.left, AppParams::Canvas::REGION.top, AppParams::Canvas::REGION.right, AppParams::Canvas::REGION.bottom);
+        FillRect(hdc, &AppParams::Canvas::REGION, CANVAS_BACKGROUND_BRUSH);
+
+        for (auto& rect : AppParams::Button::REGIONS)
+        {
+            FillRect(hdc, &rect, BTN_BACKGROUND_BRUSH);
+        }
 
         EndPaint(hWnd, &ps);
     }
@@ -80,7 +70,7 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
         {
             hdc = GetDC(hWnd);
 
-            SelectObject(hdc, LINE_PEN);
+            SelectObject(hdc, RUBBER_LINE_PEN);
             SetROP2(hdc, R2_XORPEN);
 
             MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
@@ -104,7 +94,13 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
         hdc = GetDC(hWnd);
 
-        SelectObject(hdc, LINE_PEN);
+        SelectObject(hdc, RUBBER_LINE_PEN);
+        SetROP2(hdc, R2_XORPEN);
+
+        MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
+        LineTo(hdc, line_end.x, line_end.y);
+
+        SelectObject(hdc, SOLID_LINE_PEN);
         SetROP2(hdc, R2_COPYPEN);
 
         MoveToEx(hdc, line_beg.x, line_beg.y, nullptr);
@@ -161,9 +157,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR lpCm
 
     RECT window_pos{ };
     window_pos.left = WINDOW_INIT_POS_X;
-    window_pos.right = WINDOW_WIDTH + window_pos.left;
+    window_pos.right = AppParams::Window::WIDTH + window_pos.left;
     window_pos.top = WINDOW_INIT_POS_Y;
-    window_pos.bottom = WINDOW_HEIGHT + window_pos.top;
+    window_pos.bottom = AppParams::Window::HEIGHT + window_pos.top;
     DWORD const style{ static_cast<DWORD>(WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX) };
     DWORD const ex_style{ static_cast<DWORD>(WS_EX_OVERLAPPEDWINDOW) };
     AdjustWindowRectEx(&window_pos, style, FALSE, ex_style);
@@ -192,6 +188,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPSTR lpCm
     
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
+
 
     MSG msg{ };
     while (GetMessageW(&msg, NULL, 0, 0))

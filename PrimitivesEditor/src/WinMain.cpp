@@ -62,7 +62,7 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
         case WM_MOUSEMOVE:
         {
-            if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
+            if (wParam == VK_LBUTTON)
             {
                 hdc = GetDC(hWnd);
 

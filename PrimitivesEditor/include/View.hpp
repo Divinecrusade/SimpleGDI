@@ -6,10 +6,6 @@ class View
 {
 public:
     
-    static constexpr int BASE_X{ 0 };
-    static constexpr int BASE_Y{ 0 };
-
-
     View() noexcept = default;
     View(View const&) = delete;
     View(View&&) = delete;

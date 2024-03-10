@@ -55,24 +55,21 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
             line_beg = line_end = cursor_pos;
             
-            if (!is_contained(cursor_pos, AppParams::Canvas::REGION))
+            for (size_t i{ static_cast<size_t>(FunMode::LINE) }; i != static_cast<size_t>(FunMode::NONE); ++i)
             {
-                for (size_t i{ static_cast<size_t>(FunMode::LINE) }; i != static_cast<size_t>(FunMode::NONE); ++i)
+                if (is_contained(cursor_pos, AppParams::Button::REGIONS[i]))
                 {
-                    if (is_contained(cursor_pos, AppParams::Button::REGIONS[i]))
-                    {
-                        hdc = GetDC(hWnd);
+                    hdc = GetDC(hWnd);
 
-                        renderer.update_context(hdc);
+                    renderer.update_context(hdc);
 
-                        renderer.unselect_btn(static_cast<size_t>(choosen_mode));
-                        choosen_mode = static_cast<FunMode>(i);
-                        renderer.select_btn(i);
+                    renderer.select_btn(i);
+                    renderer.unselect_btn(static_cast<size_t>(choosen_mode));
+                    choosen_mode = (i == static_cast<size_t>(choosen_mode) ? FunMode::NONE : static_cast<FunMode>(i));
 
-                        ReleaseDC(hWnd, hdc);
+                    ReleaseDC(hWnd, hdc);
 
-                        break;
-                    }
+                    break;
                 }
             }
         }
@@ -80,6 +77,8 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
         case WM_MOUSEMOVE:
         {
+            if (choosen_mode == FunMode::NONE) break;
+
             switch(wParam) 
             {
                 case VK_LBUTTON:
@@ -106,13 +105,20 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
         case WM_LBUTTONUP:
         {
+            if (choosen_mode == FunMode::NONE) break;
+
             hdc = GetDC(hWnd);
 
             renderer.update_context(hdc);
             renderer.set_clipping();
 
             renderer.draw_rubber_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y });
-            renderer.draw_solid_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y });
+
+            switch (choosen_mode)
+            {
+                case FunMode::LINE: renderer.draw_solid_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y }); break;
+                default: break;
+            }
 
             ReleaseDC(hWnd, hdc);
         }

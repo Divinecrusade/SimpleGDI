@@ -88,7 +88,26 @@ namespace AppParams
         }
 
         static constexpr std::array<RECT, N> REGIONS{ get_btn_regions() };
+        static constexpr std::array<wchar_t const* const, N> TEXTS{ L"line", L"rectangle", L"ellipse", L"unzoom"};
+        
+        static constexpr auto BORDER_COLOR{ RGB(255, 0, 0) };
+        static constexpr int  BORDER_WIDTH{ 2 };
+
+        namespace ChooseLine
+        {
+            static constexpr size_t I{ 0U };
+        }
+
+        namespace ChooseRectangle
+        {
+            static constexpr size_t I{ 1U };
+        }
+
+        namespace ChooseEllipse
+        {
+            static constexpr size_t I{ 2U };
+        }
     }
-};
+}
 
 #endif

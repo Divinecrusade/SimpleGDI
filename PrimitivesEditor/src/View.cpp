@@ -1,4 +1,5 @@
 #include "View.hpp"
+#include <wchar.h>
 
 
 View::~View() noexcept
@@ -32,9 +33,21 @@ void View::draw_stage() const noexcept
     Rectangle(cur_context, AppParams::Canvas::REGION.left, AppParams::Canvas::REGION.top, AppParams::Canvas::REGION.right, AppParams::Canvas::REGION.bottom);
     FillRect(cur_context, &AppParams::Canvas::REGION, CANVAS_BACKGROUND_BRUSH);
 
-    for (auto& rect : AppParams::Button::REGIONS)
+    for (size_t i{ 0U }; i != AppParams::Button::N; ++i)
     {
-        FillRect(cur_context, &rect, BTN_BACKGROUND_BRUSH);
+        FillRect(cur_context, &AppParams::Button::REGIONS[i], BTN_BACKGROUND_BRUSH);
+
+        SIZE string_size{ };
+        auto const string_length{ wcslen(AppParams::Button::TEXTS[i]) };
+        GetTextExtentPoint32W(cur_context, AppParams::Button::TEXTS[i], string_length, &string_size);
+        TextOutW
+        (
+            cur_context, 
+            AppParams::Button::REGIONS[i].left + AppParams::Button::WIDTH / 2 - string_size.cx / 2,
+            AppParams::Button::REGIONS[i].top + AppParams::Button::HEIGHT / 2 - string_size.cy / 2,
+            AppParams::Button::TEXTS[i],
+            string_length
+        );
     }
 }
 

@@ -5,6 +5,7 @@
 #define _DEBUG
 
 #include "View.hpp"
+#include "FunMode.hpp"
 
 #include <cwchar>
 
@@ -19,6 +20,11 @@ __forceinline POINT get_cursor_pos_on_window(LPARAM lParam) noexcept
     return POINT{ static_cast<long>(GET_X_LPARAM(lParam)), static_cast<long>(GET_Y_LPARAM(lParam)) };
 }
 
+__forceinline bool is_contained(POINT const& pos, RECT const& frame) noexcept
+{
+    return pos.x >= frame.left && pos.x <= frame.right && pos.y >= frame.top && pos.y <= frame.bottom;
+}
+
 LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
     static HDC hdc{ };
@@ -26,6 +32,7 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
     static View renderer{ };
     static POINT line_beg{ };
     static POINT line_end{ };
+    static FunMode choosen_mode{ FunMode::NONE };
 
 
     switch (message)
@@ -44,7 +51,32 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
         case WM_LBUTTONDOWN:
         {
-            line_beg = line_end = get_cursor_pos_on_window(lParam);
+            POINT const cursor_pos{ get_cursor_pos_on_window(lParam) };
+
+            if (is_contained(cursor_pos, AppParams::Canvas::REGION) && choosen_mode != FunMode::NONE)
+            {
+                line_beg = line_end = cursor_pos;
+            }
+            else
+            {
+                for (size_t i{ static_cast<size_t>(FunMode::LINE) }; i != static_cast<size_t>(FunMode::NONE); ++i)
+                {
+                    if (is_contained(cursor_pos, AppParams::Button::REGIONS[i]))
+                    {
+                        hdc = GetDC(hWnd);
+
+                        renderer.update_context(hdc);
+
+                        renderer.unselect_btn(static_cast<size_t>(choosen_mode));
+                        choosen_mode = static_cast<FunMode>(i);
+                        renderer.select_btn(i);
+
+                        ReleaseDC(hWnd, hdc);
+
+                        break;
+                    }
+                }
+            }
         }
         break;
 

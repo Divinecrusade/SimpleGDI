@@ -22,6 +22,9 @@ public:
     void draw_rubber_line(CartesianCoordinate2D const& beg, CartesianCoordinate2D const& end) const noexcept;
     void draw_solid_line (CartesianCoordinate2D const& beg, CartesianCoordinate2D const& end) const noexcept;
 
+    void select_btn  (size_t i) const noexcept;
+    void unselect_btn(size_t i) const noexcept;
+
 private:
 
     void draw_line(int x1, int y1, int x2, int y2) const noexcept;
@@ -42,4 +45,5 @@ private:
 
     HBRUSH const CANVAS_BACKGROUND_BRUSH{ CreateSolidBrush(AppParams::Canvas::BACKGROUND_COLOR) };
     HBRUSH const BTN_BACKGROUND_BRUSH   { CreateSolidBrush(AppParams::Button::BACKGROUND_COLOR) };
+    HBRUSH const BTN_BORDER_BRUSH       { CreateSolidBrush(AppParams::Button::BORDER_COLOR) };
 };

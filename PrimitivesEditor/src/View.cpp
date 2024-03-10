@@ -4,7 +4,7 @@
 
 View::~View() noexcept
 {
-    delete_objects(CANVAS_BORDER_PEN, RUBBER_LINE_PEN, SOLID_LINE_PEN, CANVAS_BACKGROUND_BRUSH, BTN_BACKGROUND_BRUSH);
+    delete_objects(CANVAS_BORDER_PEN, RUBBER_LINE_PEN, SOLID_LINE_PEN, CANVAS_BACKGROUND_BRUSH, BTN_BACKGROUND_BRUSH, BTN_BORDER_BRUSH);
 }
 
 void View::update_context(HDC const& context) noexcept
@@ -73,6 +73,20 @@ void View::draw_solid_line(CartesianCoordinate2D const& beg, CartesianCoordinate
 
     SetROP2(cur_context, OLD_ROP);
     SelectObject(cur_context, OLD_OBJ);
+}
+
+void View::select_btn(size_t i) const noexcept
+{
+    if (i >= AppParams::Button::N) return;
+
+    FrameRect(cur_context, &AppParams::Button::REGIONS[i], BTN_BORDER_BRUSH);
+}
+
+void View::unselect_btn(size_t i) const noexcept
+{
+    if (i >= AppParams::Button::N) return;
+
+    FrameRect(cur_context, &AppParams::Button::REGIONS[i], BTN_BACKGROUND_BRUSH);
 }
 
 void View::draw_line(int x1, int y1, int x2, int y2) const noexcept

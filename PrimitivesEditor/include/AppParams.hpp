@@ -26,6 +26,32 @@ namespace AppParams
         static constexpr auto ROP  { R2_COPYPEN };
     }
 
+    namespace Rectangle
+    {
+        namespace Stroke
+        {
+            static constexpr auto STYLE{ PS_SOLID };
+            static constexpr int  WIDTH{ 2 };
+            static constexpr auto COLOR{ RGB(255, 0, 0) };
+            static constexpr auto ROP{ R2_COPYPEN };
+        }
+
+        static constexpr auto COLOR{ RGB(255, 255, 255) };
+    }
+
+    namespace Ellipse
+    {
+        namespace Stroke
+        {
+            static constexpr auto STYLE{ PS_SOLID };
+            static constexpr int  WIDTH{ 2 };
+            static constexpr auto COLOR{ RGB(255, 0, 0) };
+            static constexpr auto ROP{ R2_COPYPEN };
+        }
+
+        static constexpr auto COLOR{ RGB(255, 255, 255) };
+    }
+
     namespace Canvas
     {
         static constexpr int  WIDTH { 600 };

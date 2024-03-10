@@ -116,7 +116,9 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
             switch (choosen_mode)
             {
-                case FunMode::LINE: renderer.draw_solid_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y }); break;
+                case FunMode::LINE:      renderer.draw_solid_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y }); break;
+                case FunMode::RECTANGLE: renderer.draw_filled_rect({ line_beg.x, line_beg.y }, { line_end.x, line_end.y }); break;
+                case FunMode::ELLIPSE:   renderer.draw_filled_ellipse({ line_beg.x, line_beg.y }, { line_end.x, line_end.y }); break;
                 default: break;
             }
 

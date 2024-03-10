@@ -75,6 +75,34 @@ void View::draw_solid_line(CartesianCoordinate2D const& beg, CartesianCoordinate
     SelectObject(cur_context, OLD_OBJ);
 }
 
+void View::draw_filled_rect(CartesianCoordinate2D const& leftTop, CartesianCoordinate2D const& rightBot) const noexcept
+{
+    auto const OLD_PEN{ SelectPen(cur_context, STROKE_RECTANGLE) };
+    auto const OLD_BRUSH{ SelectBrush(cur_context, FILL_RECTANGLE) };
+    auto const OLD_ROP{ GetROP2(cur_context) };
+    SetROP2(cur_context, AppParams::Rectangle::Stroke::ROP);
+    
+    fill_rect(leftTop.x, leftTop.y, rightBot.x, rightBot.y);
+
+    SetROP2(cur_context, OLD_ROP);
+    SelectPen(cur_context, OLD_PEN);
+    SelectBrush(cur_context, OLD_BRUSH);
+}
+
+void View::draw_filled_ellipse(CartesianCoordinate2D const& leftTop, CartesianCoordinate2D const& rightBot) const noexcept
+{
+    auto const OLD_PEN{ SelectPen(cur_context, STROKE_ELLIPSE) };
+    auto const OLD_BRUSH{ SelectBrush(cur_context, FILL_ELLIPSE) };
+    auto const OLD_ROP{ GetROP2(cur_context) };
+    SetROP2(cur_context, AppParams::Ellipse::Stroke::ROP);
+
+    fill_ellipse(leftTop.x, leftTop.y, rightBot.x, rightBot.y);
+
+    SetROP2(cur_context, OLD_ROP);
+    SelectPen(cur_context, OLD_PEN);
+    SelectBrush(cur_context, OLD_BRUSH);
+}
+
 void View::select_btn(size_t i) const noexcept
 {
     if (i >= AppParams::Button::N) return;
@@ -93,5 +121,15 @@ void View::draw_line(int x1, int y1, int x2, int y2) const noexcept
 {
     MoveToEx(cur_context, x1, y1, nullptr);
     LineTo(cur_context, x2, y2);
+}
+
+void View::fill_rect(int left, int top, int right, int bottom) const noexcept
+{
+    Rectangle(cur_context, left, top, right, bottom);
+}
+
+void View::fill_ellipse(int left, int top, int right, int bottom) const noexcept
+{
+    Ellipse(cur_context, left, top, right, bottom);
 }
 

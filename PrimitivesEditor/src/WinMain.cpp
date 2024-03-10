@@ -53,11 +53,9 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
         {
             POINT const cursor_pos{ get_cursor_pos_on_window(lParam) };
 
-            if (is_contained(cursor_pos, AppParams::Canvas::REGION) && choosen_mode != FunMode::NONE)
-            {
-                line_beg = line_end = cursor_pos;
-            }
-            else
+            line_beg = line_end = cursor_pos;
+            
+            if (!is_contained(cursor_pos, AppParams::Canvas::REGION))
             {
                 for (size_t i{ static_cast<size_t>(FunMode::LINE) }; i != static_cast<size_t>(FunMode::NONE); ++i)
                 {

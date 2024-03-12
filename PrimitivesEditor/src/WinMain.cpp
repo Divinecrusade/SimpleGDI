@@ -5,6 +5,7 @@
 #define _DEBUG
 
 #include "View.hpp"
+#include "Model.hpp"
 #include "FunMode.hpp"
 
 #include <cwchar>
@@ -30,6 +31,7 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
     static HDC hdc{ };
 
     static View renderer{ };
+    static Model logic_space{ };
     static POINT line_beg{ };
     static POINT line_end{ };
     static FunMode choosen_mode{ FunMode::NONE };
@@ -116,9 +118,27 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
             switch (choosen_mode)
             {
-                case FunMode::LINE:      renderer.draw_solid_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y }); break;
-                case FunMode::RECTANGLE: renderer.draw_filled_rect({ line_beg.x, line_beg.y }, { line_end.x, line_end.y }); break;
-                case FunMode::ELLIPSE:   renderer.draw_filled_ellipse({ line_beg.x, line_beg.y }, { line_end.x, line_end.y }); break;
+                case FunMode::LINE:      
+
+                    renderer.draw_solid_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y }); 
+                    logic_space.add_object(Model::TypeOfPrimitive::LINE, { line_beg.x, line_beg.y }, { line_end.x, line_end.y });
+
+                    break;
+
+                case FunMode::RECTANGLE: 
+                    
+                    renderer.draw_filled_rect({ line_beg.x, line_beg.y }, { line_end.x, line_end.y }); 
+                    logic_space.add_object(Model::TypeOfPrimitive::RECTANGLE, { line_beg.x, line_beg.y }, { line_end.x, line_end.y });
+
+                    break;
+                
+                case FunMode::ELLIPSE:   
+                    
+                    renderer.draw_filled_ellipse({ line_beg.x, line_beg.y }, { line_end.x, line_end.y }); 
+                    logic_space.add_object(Model::TypeOfPrimitive::ELLIPSE, { line_beg.x, line_beg.y }, { line_end.x, line_end.y });
+
+                    break;
+                
                 default: break;
             }
 

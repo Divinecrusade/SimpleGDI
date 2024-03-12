@@ -10,7 +10,7 @@ set(UNICODE_DEFAULT ON)
 
 include_directories(${HDR_DIR})
 
-add_executable (PrimitivesEditor WIN32 "${SRC_DIR}/WinMain.cpp" "${SRC_DIR}/View.cpp")
+add_executable (PrimitivesEditor WIN32 "${SRC_DIR}/WinMain.cpp" "${SRC_DIR}/View.cpp" "src/Model.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET PrimitivesEditor PROPERTY CXX_STANDARD 20)

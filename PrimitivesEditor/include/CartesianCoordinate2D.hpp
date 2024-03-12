@@ -26,6 +26,8 @@ public:
     {
         x = coordinate.x;
         y = coordinate.y;
+
+        return *this;
     }
     CartesianCoordinate2D& operator=(CartesianCoordinate2D&&) = delete;
 

@@ -1,4 +1,6 @@
-#include "CartesianCoordinate2D.hpp"
+#ifndef VIEW
+#define VIEW
+
 #include "AppParams.hpp"
 
 
@@ -19,13 +21,15 @@ public:
     void set_clipping() const noexcept;
 
     void draw_stage() const noexcept;
-    void draw_rubber_line   (CartesianCoordinate2D const& beg, CartesianCoordinate2D const& end) const noexcept;
-    void draw_solid_line    (CartesianCoordinate2D const& beg, CartesianCoordinate2D const& end) const noexcept;
-    void draw_filled_rect   (CartesianCoordinate2D const& leftTop, CartesianCoordinate2D const& rightBot) const noexcept;
-    void draw_filled_ellipse(CartesianCoordinate2D const& leftTop, CartesianCoordinate2D const& rightBot) const noexcept;
+    void draw_rubber_line   (POINT const& beg,     POINT const& end) const noexcept;
+    void draw_solid_line    (POINT const& beg,     POINT const& end) const noexcept;
+    void draw_filled_rect   (POINT const& leftTop, POINT const& rightBot) const noexcept;
+    void draw_filled_ellipse(POINT const& leftTop, POINT const& rightBot) const noexcept;
 
     void select_btn  (size_t i) const noexcept;
     void unselect_btn(size_t i) const noexcept;
+
+    void clear_canvas() const noexcept;
 
 private:
 
@@ -55,3 +59,6 @@ private:
     HBRUSH const FILL_RECTANGLE         { CreateSolidBrush(AppParams::Rectangle::COLOR) };
     HBRUSH const FILL_ELLIPSE           { CreateSolidBrush(AppParams::Ellipse::COLOR) };
 };
+
+
+#endif // !VIEW

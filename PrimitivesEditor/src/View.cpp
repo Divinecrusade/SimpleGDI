@@ -51,7 +51,7 @@ void View::draw_stage() const noexcept
     }
 }
 
-void View::draw_rubber_line(CartesianCoordinate2D const& beg, CartesianCoordinate2D const& end) const noexcept
+void View::draw_rubber_line(POINT const& beg, POINT const& end) const noexcept
 {
     auto const OLD_OBJ{ SelectObject(cur_context, RUBBER_LINE_PEN) };
     auto const OLD_ROP{ GetROP2(cur_context) };
@@ -63,7 +63,7 @@ void View::draw_rubber_line(CartesianCoordinate2D const& beg, CartesianCoordinat
     SelectObject(cur_context, OLD_OBJ);
 }
 
-void View::draw_solid_line(CartesianCoordinate2D const& beg, CartesianCoordinate2D const& end) const noexcept
+void View::draw_solid_line(POINT const& beg, POINT const& end) const noexcept
 {
     auto const OLD_OBJ{ SelectObject(cur_context, SOLID_LINE_PEN) };
     auto const OLD_ROP{ GetROP2(cur_context) };
@@ -75,7 +75,7 @@ void View::draw_solid_line(CartesianCoordinate2D const& beg, CartesianCoordinate
     SelectObject(cur_context, OLD_OBJ);
 }
 
-void View::draw_filled_rect(CartesianCoordinate2D const& leftTop, CartesianCoordinate2D const& rightBot) const noexcept
+void View::draw_filled_rect(POINT const& leftTop, POINT const& rightBot) const noexcept
 {
     auto const OLD_PEN{ SelectPen(cur_context, STROKE_RECTANGLE) };
     auto const OLD_BRUSH{ SelectBrush(cur_context, FILL_RECTANGLE) };
@@ -89,7 +89,7 @@ void View::draw_filled_rect(CartesianCoordinate2D const& leftTop, CartesianCoord
     SelectBrush(cur_context, OLD_BRUSH);
 }
 
-void View::draw_filled_ellipse(CartesianCoordinate2D const& leftTop, CartesianCoordinate2D const& rightBot) const noexcept
+void View::draw_filled_ellipse(POINT const& leftTop, POINT const& rightBot) const noexcept
 {
     auto const OLD_PEN{ SelectPen(cur_context, STROKE_ELLIPSE) };
     auto const OLD_BRUSH{ SelectBrush(cur_context, FILL_ELLIPSE) };
@@ -115,6 +115,15 @@ void View::unselect_btn(size_t i) const noexcept
     if (i >= AppParams::Button::N) return;
 
     FrameRect(cur_context, &AppParams::Button::REGIONS[i], BTN_BACKGROUND_BRUSH);
+}
+
+void View::clear_canvas() const noexcept
+{
+    auto const OLD_BRUSH{ SelectBrush(cur_context, CANVAS_BACKGROUND_BRUSH) };
+ 
+    fill_rect(AppParams::Canvas::REGION.left, AppParams::Canvas::REGION.top, AppParams::Canvas::REGION.right, AppParams::Canvas::REGION.bottom);
+
+    SelectBrush(cur_context, OLD_BRUSH);
 }
 
 void View::draw_line(int x1, int y1, int x2, int y2) const noexcept

@@ -1,15 +1,19 @@
 #ifndef HOMOGENEOUSCOORDINATE2D
 #define HOMOGENEOUSCOORDINATE2D
 
-#include <CartesianCoordinate2D.hpp>
+#include "Matrix.hpp"
+#include "CoordinateSystem.hpp"
 
-template<double w = 1.>
+#include <Windows.h>
+
+
+template<CoordinateSystem C, double w = 1.>
 class HomogeneousCoordinate2D
 {
 public:
 
     HomogeneousCoordinate2D() = delete;
-    HomogeneousCoordinate2D(CartesianCoordinate2D const& coordinate) noexcept
+    HomogeneousCoordinate2D(POINT const& coordinate) noexcept
     :
     point{ { static_cast<double>(coordinate.x) * w, static_cast<double>(coordinate.y) * w, w } },
     X{ point[0][0] },
@@ -23,9 +27,9 @@ public:
     Y{ point[0][1] },
     W{ point[0][2] }
     { }
-    HomogeneousCoordinate2D(HomogeneousCoordinate2D&&) = delete;
+    HomogeneousCoordinate2D(HomogeneousCoordinate2D&&) noexcept = default;
 
-    HomogeneousCoordinate2D& operator=(CartesianCoordinate2D const& coordinate) noexcept
+    HomogeneousCoordinate2D& operator=(POINT const& coordinate) noexcept
     {
         point[0][0] = static_cast<double>(coordinate.x) * W;
         point[0][1] = static_cast<double>(coordinate.y) * W;
@@ -39,14 +43,9 @@ public:
 
         return *this;
     }
-    HomogeneousCoordinate2D& operator=(HomogeneousCoordinate2D&&) = delete;
+    HomogeneousCoordinate2D& operator=(HomogeneousCoordinate2D&&) = default;
 
     ~HomogeneousCoordinate2D() = default;
-
-    CartesianCoordinate2D convert_to_cartesian() const noexcept
-    {
-        return CartesianCoordinate2D{ static_cast<int>(X / W), static_cast<int>(Y / W) };
-    }
 
     HomogeneousCoordinate2D& transform(Matrices::Matrix<3U, 3U> const& affine) noexcept
     {

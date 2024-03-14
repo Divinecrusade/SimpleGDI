@@ -116,14 +116,14 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
             renderer.draw_rubber_line(line_beg, line_end);
 
-            if (!is_contained(get_cursor_pos_on_window(lParam), AppParams::Canvas::REGION)) break;;
+            if (!is_contained(get_cursor_pos_on_window(lParam), AppParams::Canvas::REGION)) break;
 
             switch (choosen_mode)
             {
                 case FunMode::LINE:      
 
                     renderer.draw_solid_line(line_beg, line_end); 
-                    //logic_space.add_object(Model::TypeOfPrimitive::LINE, { line_beg.x, line_beg.y }, { line_end.x, line_end.y });
+                    logic_space.add_object(Model::TypeOfPrimitive::LINE, line_beg, line_end);
 
                 break;
 
@@ -137,7 +137,7 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
                 case FunMode::ELLIPSE:   
                     
                     renderer.draw_filled_ellipse(line_beg, line_end); 
-                    //logic_space.add_object(Model::TypeOfPrimitive::ELLIPSE, { line_beg.x, line_beg.y }, { line_end.x, line_end.y });
+                    logic_space.add_object(Model::TypeOfPrimitive::ELLIPSE, line_beg, line_end);
 
                 break;
                 
@@ -155,7 +155,7 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
                         {
                         case Model::TypeOfPrimitive::LINE: 
                         
-                            //renderer.draw_solid_line(obj.second[0U].convert(), obj.second[1U].convert());
+                            renderer.draw_solid_line(obj.second[0U].convert(), obj.second[1U].convert());
                         
                         break;
 
@@ -167,7 +167,7 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
                         case Model::TypeOfPrimitive::ELLIPSE:
 
-                            //renderer.draw_filled_ellipse(obj.second[0U], obj.second[1U]);
+                            renderer.draw_filled_ellipse(obj.second[0U].convert(), obj.second[1U].convert());
 
                         break;
 
@@ -178,11 +178,41 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
                 }
                 break;
 
-                default: 
-                    
+                case FunMode::UNZOOM:
+                {
+                    logic_space.unzoom();
                     renderer.clear_canvas();
-                    
+                    auto objects{ logic_space.get_objects() };
+                    for (auto& obj : objects)
+                    {
+                        switch (obj.first)
+                        {
+                        case Model::TypeOfPrimitive::LINE:
+
+                            renderer.draw_solid_line(obj.second[0U].convert(), obj.second[1U].convert());
+
+                            break;
+
+                        case Model::TypeOfPrimitive::RECTANGLE:
+
+                            renderer.draw_filled_rect(obj.second[0U].convert(), obj.second[1U].convert());
+
+                            break;
+
+                        case Model::TypeOfPrimitive::ELLIPSE:
+
+                            renderer.draw_filled_ellipse(obj.second[0U].convert(), obj.second[1U].convert());
+
+                            break;
+
+                        default:
+                            break;
+                        }
+                    }
+                }
                 break;
+
+                default:  return DefWindowProcW(hWnd, message, wParam, lParam); break;
             }
 
             ReleaseDC(hWnd, hdc);

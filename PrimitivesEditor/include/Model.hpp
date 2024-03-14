@@ -20,7 +20,7 @@ public:
 
 public:
 
-    Model() = default;
+    Model() noexcept = default;
     Model(Model const&) = delete;
     Model(Model&&) = delete;
 
@@ -52,7 +52,10 @@ private:
     static constexpr double MIN_Y{ 0. };
     static constexpr double MAX_Y{ static_cast<double>(AppParams::Canvas::HEIGHT) };
 
-    RECT window{ VIEWPORT };
+    const Matrices::Matrix<3U, 3U> IDENTITY{ {1., 0., 0., 0., 1., 0., 0., 0., 1.} };
+
+    Matrices::Matrix<3U, 3U> cur_state{ IDENTITY };
+    std::stack<Matrices::Matrix<3U, 3U>> transformations_chain;
 
     std::vector<std::pair<TypeOfPrimitive, std::array<HomogeneousCoordinate2D<CoordinateSystem::NDC>, 2U>>> objects;
 };

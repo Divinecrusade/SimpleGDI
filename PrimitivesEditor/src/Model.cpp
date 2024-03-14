@@ -2,13 +2,31 @@
 #include <iterator>
 
 
-void Model::zoom(RECT const& new_window) noexcept
+void Model::zoom(RECT const& window) noexcept
 {
-    window = new_window;
+    double const Sx{ static_cast<double>(max(VIEWPORT.left, VIEWPORT.right) - min(VIEWPORT.left, VIEWPORT.right)) / (max(window.left, window.right) - min(window.left, window.right)) };
+    double const Sy{ static_cast<double>(max(VIEWPORT.bottom, VIEWPORT.top) - min(VIEWPORT.bottom, VIEWPORT.top)) / (max(window.bottom, window.top) - min(window.bottom, window.top)) };
+    double const Tx{ min(VIEWPORT.left, VIEWPORT.right) - Sx * min(window.left, window.right) };
+    double const Ty{ min(VIEWPORT.bottom, VIEWPORT.top) - Sy * min(window.bottom, window.top) };
+
+    Matrices::Matrix<3U, 3U> transformation
+    {
+        {
+            Sx, 0., 0.,
+            0., Sy, 0.,
+            Tx, Ty, 1.
+        }
+    };
+    cur_state *= transformation;
+    transformations_chain.push(transformation);
 }
 
 void Model::unzoom() noexcept
 {
+    if (transformations_chain.empty()) return;
+
+    cur_state *= !transformations_chain.top();
+    transformations_chain.pop();
 }
 
 void Model::add_object(TypeOfPrimitive type, HomogeneousCoordinate2D<CoordinateSystem::DC> const& beg, HomogeneousCoordinate2D<CoordinateSystem::DC> const& end) noexcept
@@ -30,42 +48,14 @@ std::vector<std::pair<Model::TypeOfPrimitive, std::array<HomogeneousCoordinate2D
 
 HomogeneousCoordinate2D<CoordinateSystem::NDC> Model::normalize(HomogeneousCoordinate2D<CoordinateSystem::DC> const& coordinate) const noexcept
 {
-    double const Sx{ static_cast<double>(max(VIEWPORT.left, VIEWPORT.right) - min(VIEWPORT.left, VIEWPORT.right)) / (max(window.left, window.right) - min(window.left, window.right)) };
-    double const Sy{ static_cast<double>(max(VIEWPORT.bottom, VIEWPORT.top) - min(VIEWPORT.bottom, VIEWPORT.top)) / (max(window.bottom, window.top) - min(window.bottom, window.top)) };
-    double const Tx{ min(VIEWPORT.left, VIEWPORT.right) - Sx * min(window.left, window.right) };
-    double const Ty{ min(VIEWPORT.bottom, VIEWPORT.top) - Sy * min(window.bottom, window.top) };
-
-    Matrices::Matrix<3U, 3U> transformation
-    {
-        {
-            Sx, 0., 0.,
-            0., Sy, 0.,
-            Tx, Ty, 1.
-        }
-    };
-
-    auto tmp{ coordinate.get_transformed(!transformation) };
+    auto tmp{ coordinate.get_transformed(!cur_state) };
 
     return { tmp.X, tmp.Y };
 }
 
 HomogeneousCoordinate2D<CoordinateSystem::DC> Model::device(HomogeneousCoordinate2D<CoordinateSystem::NDC> const& coordinate) const noexcept
 {
-    double const Sx{ static_cast<double>(max(VIEWPORT.left, VIEWPORT.right) - min(VIEWPORT.left, VIEWPORT.right)) / (max(window.left, window.right) - min(window.left, window.right)) };
-    double const Sy{ static_cast<double>(max(VIEWPORT.bottom, VIEWPORT.top) - min(VIEWPORT.bottom, VIEWPORT.top)) / (max(window.bottom, window.top) - min(window.bottom, window.top)) };
-    double const Tx{ min(VIEWPORT.left, VIEWPORT.right) - Sx * min(window.left, window.right) };
-    double const Ty{ min(VIEWPORT.bottom, VIEWPORT.top) - Sy * min(window.bottom, window.top) };
-
-    Matrices::Matrix<3U, 3U> transformation
-    {
-        {
-            Sx, 0., 0.,
-            0., Sy, 0.,
-            Tx, Ty, 1.
-        }
-    };
-
-    auto tmp{ coordinate.get_transformed(transformation) };
+    auto tmp{ coordinate.get_transformed(cur_state) };
 
     return { tmp.X, tmp.Y };
 }

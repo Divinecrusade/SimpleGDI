@@ -13,6 +13,13 @@ class HomogeneousCoordinate2D
 public:
 
     HomogeneousCoordinate2D() = delete;
+    HomogeneousCoordinate2D(double x, double y) noexcept
+    :
+    point{ { x * w, y * w, w } },
+    X{ point[0][0] },
+    Y{ point[0][1] },
+    W{ point[0][2] }
+    { }
     HomogeneousCoordinate2D(POINT const& coordinate) noexcept
     :
     point{ { static_cast<double>(coordinate.x) * w, static_cast<double>(coordinate.y) * w, w } },
@@ -27,7 +34,7 @@ public:
     Y{ point[0][1] },
     W{ point[0][2] }
     { }
-    HomogeneousCoordinate2D(HomogeneousCoordinate2D&&) noexcept = default;
+    HomogeneousCoordinate2D(HomogeneousCoordinate2D&&) noexcept = delete;
 
     HomogeneousCoordinate2D& operator=(POINT const& coordinate) noexcept
     {
@@ -43,9 +50,14 @@ public:
 
         return *this;
     }
-    HomogeneousCoordinate2D& operator=(HomogeneousCoordinate2D&&) = default;
+    HomogeneousCoordinate2D& operator=(HomogeneousCoordinate2D&&) = delete;
 
     ~HomogeneousCoordinate2D() = default;
+
+    POINT convert() const noexcept
+    {
+        return POINT{ static_cast<int>(X / W), static_cast<int>(Y / W) };
+    }
 
     HomogeneousCoordinate2D& transform(Matrices::Matrix<3U, 3U> const& affine) noexcept
     {

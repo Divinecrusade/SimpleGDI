@@ -3,7 +3,8 @@
 
 enum class CoordinateSystem
 {
-    WC, NDC, DC
+    // WC, 
+    NDC, DC
 };
 
 #endif // !COORDINATESYSTEM

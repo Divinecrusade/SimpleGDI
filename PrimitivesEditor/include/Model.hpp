@@ -11,24 +11,6 @@
 
 class Model
 {
-private:
-
-    inline Matrices::Matrix<3U, 3U> get_zoom_matrix() const noexcept
-    {
-        return Matrices::Matrix<3U, 3U>
-        { 
-            {
-                static_cast<double>(WINDOW.right - WINDOW.left) / (cur_viewport.right - cur_viewport.left), 0., 0.,
-                0., static_cast<double>(WINDOW.bottom - WINDOW.top) / (cur_viewport.bottom - cur_viewport.top), 0.,
-                static_cast<double>(WINDOW.left - cur_viewport.left), static_cast<double>(WINDOW.top - cur_viewport.top), 1.
-
-                //static_cast<double>(max(cur_viewport.left, cur_viewport.right) - min(cur_viewport.left, cur_viewport.right)) / (max(WINDOW.left, WINDOW.right) - min(WINDOW.left, WINDOW.right)), 0., 0.,
-                //0., static_cast<double>(max(cur_viewport.top, cur_viewport.bottom) - min(cur_viewport.top, cur_viewport.bottom)) / (max(WINDOW.top, WINDOW.bottom) - min(WINDOW.top, WINDOW.bottom)), 0.,
-                //static_cast<double>(min(cur_viewport.left, cur_viewport.right) - min(WINDOW.left, WINDOW.right)), static_cast<double>(min(cur_viewport.top, cur_viewport.bottom) - min(WINDOW.top, WINDOW.bottom)), 1.
-            }
-        };
-    }
-
 public:
 
     enum class TypeOfPrimitive
@@ -47,8 +29,8 @@ public:
 
     ~Model() = default;
 
-    void set_viewport(RECT const& new_viewport) noexcept;
-    void unset_viewport() noexcept;
+    void zoom(RECT const& window) noexcept;
+    void unzoom() noexcept;
 
     void add_object(TypeOfPrimitive type, HomogeneousCoordinate2D<CoordinateSystem::DC> const& beg, HomogeneousCoordinate2D<CoordinateSystem::DC> const& end) noexcept;
 
@@ -56,16 +38,23 @@ public:
 
 private:
 
-    
+    HomogeneousCoordinate2D<CoordinateSystem::NDC> normalize(HomogeneousCoordinate2D<CoordinateSystem::DC> const& coordinate) const noexcept;
+
+    HomogeneousCoordinate2D<CoordinateSystem::DC>  device(HomogeneousCoordinate2D<CoordinateSystem::NDC> const& coordinate) const noexcept;
 
 private:
     
-    static constexpr RECT WINDOW{ AppParams::Canvas::REGION };
-    
-    RECT cur_viewport{ WINDOW };
-    std::stack<RECT> viewports;
+    static constexpr RECT VIEWPORT{ AppParams::Canvas::REGION };
 
-    std::vector<std::pair<TypeOfPrimitive, std::array<HomogeneousCoordinate2D<CoordinateSystem::WC>, 2U>>> wc;
+    static constexpr double MIN_X{ 0. };
+    static constexpr double MAX_X{ static_cast<double>(AppParams::Canvas::WIDTH) };
+
+    static constexpr double MIN_Y{ 0. };
+    static constexpr double MAX_Y{ static_cast<double>(AppParams::Canvas::HEIGHT) };
+
+    RECT window{ VIEWPORT };
+
+    std::vector<std::pair<TypeOfPrimitive, std::array<HomogeneousCoordinate2D<CoordinateSystem::NDC>, 2U>>> objects;
 };
 
 

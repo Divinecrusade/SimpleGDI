@@ -90,11 +90,11 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
                     renderer.update_context(hdc);
                     renderer.set_clipping();
 
-                    renderer.draw_rubber_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y });
+                    renderer.draw_rubber_line(line_beg, line_end);
 
                     line_end = get_cursor_pos_on_window(lParam);
 
-                    renderer.draw_rubber_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y });
+                    renderer.draw_rubber_line(line_beg, line_end);
 
                     ReleaseDC(hWnd, hdc);
                 }
@@ -114,7 +114,7 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
             renderer.update_context(hdc);
             renderer.set_clipping();
 
-            renderer.draw_rubber_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y });
+            renderer.draw_rubber_line(line_beg, line_end);
 
             if (!is_contained(get_cursor_pos_on_window(lParam), AppParams::Canvas::REGION)) break;;
 
@@ -122,21 +122,21 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
             {
                 case FunMode::LINE:      
 
-                    renderer.draw_solid_line({ line_beg.x, line_beg.y }, { line_end.x, line_end.y }); 
+                    renderer.draw_solid_line(line_beg, line_end); 
                     //logic_space.add_object(Model::TypeOfPrimitive::LINE, { line_beg.x, line_beg.y }, { line_end.x, line_end.y });
 
                 break;
 
                 case FunMode::RECTANGLE: 
                     
-                    renderer.draw_filled_rect({ line_beg.x, line_beg.y }, { line_end.x, line_end.y }); 
-                    //logic_space.add_object(Model::TypeOfPrimitive::RECTANGLE, { line_beg.x, line_beg.y }, { line_end.x, line_end.y });
+                    renderer.draw_filled_rect(line_beg, line_end); 
+                    logic_space.add_object(Model::TypeOfPrimitive::RECTANGLE, line_beg, line_end);
 
                 break;
                 
                 case FunMode::ELLIPSE:   
                     
-                    renderer.draw_filled_ellipse({ line_beg.x, line_beg.y }, { line_end.x, line_end.y }); 
+                    renderer.draw_filled_ellipse(line_beg, line_end); 
                     //logic_space.add_object(Model::TypeOfPrimitive::ELLIPSE, { line_beg.x, line_beg.y }, { line_end.x, line_end.y });
 
                 break;
@@ -144,41 +144,37 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
                 case FunMode::ZOOM:
                 {
-                    /*RECT new_viewport{line_beg.x, line_beg.y, line_end.x, line_end.y};
-                    auto cx{ line_end.x - line_beg.x };
-                    auto cy{ line_end.y - line_beg.y };
-                    new_viewport.right = new_viewport.left + min(cx, cy);
-                    new_viewport.bottom = new_viewport.top + min(cx, cy);
+                    RECT new_viewport{line_beg.x, line_beg.y, line_end.x, line_end.y};
 
-                    logic_space.set_viewport(new_viewport);
+                    logic_space.zoom(new_viewport);
                     renderer.clear_canvas();
-                    auto objects{logic_space.get_objects()};
+                    auto objects{ logic_space.get_objects() };
                     for (auto& obj : objects)
                     {
                         switch (obj.first)
                         {
                         case Model::TypeOfPrimitive::LINE: 
                         
-                            renderer.draw_solid_line(obj.second[0U], obj.second[1U]);
+                            //renderer.draw_solid_line(obj.second[0U].convert(), obj.second[1U].convert());
                         
                         break;
 
                         case Model::TypeOfPrimitive::RECTANGLE:
 
-                            renderer.draw_filled_rect(obj.second[0U], obj.second[1U]);
+                            renderer.draw_filled_rect(obj.second[0U].convert(), obj.second[1U].convert());
 
                         break;
 
                         case Model::TypeOfPrimitive::ELLIPSE:
 
-                            renderer.draw_filled_ellipse(obj.second[0U], obj.second[1U]);
+                            //renderer.draw_filled_ellipse(obj.second[0U], obj.second[1U]);
 
                         break;
 
                         default:
                             break;
                         }
-                    }*/
+                    }
                 }
                 break;
 

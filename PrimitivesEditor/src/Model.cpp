@@ -37,25 +37,32 @@ void Model::add_object(TypeOfPrimitive type, HomogeneousCoordinate2D<CoordinateS
 std::vector<std::pair<Model::TypeOfPrimitive, std::array<HomogeneousCoordinate2D<CoordinateSystem::DC>, 2U>>> Model::get_objects() const noexcept
 {
     std::vector<std::pair<Model::TypeOfPrimitive, std::array<HomogeneousCoordinate2D<CoordinateSystem::DC>, 2U>>> render_objects{ };
+    render_objects.reserve(objects.size());
 
-    for (auto const& obj : objects)
-    {
-        render_objects.emplace_back(obj.first, std::array<HomogeneousCoordinate2D<CoordinateSystem::DC>, 2U>{ device(obj.second[0U]), device(obj.second[1U]) });
-    }
+    std::transform
+    (
+        objects.cbegin(), 
+        objects.cend(), 
+        std::back_inserter(render_objects),
+        [this](auto const& obj) 
+        { 
+            return make_pair(obj.first, std::array<HomogeneousCoordinate2D<CoordinateSystem::DC>, 2U>{ device(obj.second[0U]), device(obj.second[1U]) });
+        } 
+    );
 
     return render_objects;
 }
 
 HomogeneousCoordinate2D<CoordinateSystem::NDC> Model::normalize(HomogeneousCoordinate2D<CoordinateSystem::DC> const& coordinate) const noexcept
 {
-    auto tmp{ coordinate.get_transformed(!cur_state) };
+    auto const tmp{ coordinate.get_transformed(!cur_state) };
 
-    return { tmp.get_X(), tmp.get_Y()};
+    return { tmp.get_X(), tmp.get_Y() };
 }
 
 HomogeneousCoordinate2D<CoordinateSystem::DC> Model::device(HomogeneousCoordinate2D<CoordinateSystem::NDC> const& coordinate) const noexcept
 {
-    auto tmp{ coordinate.get_transformed(cur_state) };
+    auto const tmp{ coordinate.get_transformed(cur_state) };
 
     return { tmp.get_X(), tmp.get_Y()};
 }

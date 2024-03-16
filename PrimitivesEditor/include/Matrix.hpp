@@ -36,7 +36,7 @@ namespace Matrices
         :
         data{ data }
         { }
-        Matrix(std::array<std::array<T, nCols>, nRows>&& tmp_data) noexcept
+        constexpr Matrix(std::array<std::array<T, nCols>, nRows>&& tmp_data) noexcept
         :
         data{ tmp_data }
         { }
@@ -44,7 +44,7 @@ namespace Matrices
         :
         data{ matrix.data }
         { }
-        Matrix(Matrix&& tmp_matrix) noexcept
+        constexpr Matrix(Matrix&& tmp_matrix) noexcept
         {
             std::swap(data, tmp_matrix.data);
         }
@@ -58,14 +58,14 @@ namespace Matrices
 
             return *this;
         }
-        Matrix& operator=(Matrix&& tmp_matrix) noexcept
+        constexpr Matrix& operator=(Matrix&& tmp_matrix) noexcept
         {
             std::swap(data, tmp_matrix.data);
 
             return *this;
         }
 
-        ~Matrix() = default;
+        ~Matrix() noexcept = default;
 
         auto begin() noexcept -> decltype(data.begin())
         {
@@ -85,13 +85,13 @@ namespace Matrices
             return data.cend();
         }
         
-        std::array<T, nCols> const& operator[](size_t i) const
+        constexpr std::array<T, nCols> const& operator[](size_t i) const
         {
             assert(i <= nRows);
 
             return data[i];
         }
-        std::array<T, nCols>& operator[](size_t i)
+        constexpr std::array<T, nCols>& operator[](size_t i)
         {
             assert(i <= nRows);
 

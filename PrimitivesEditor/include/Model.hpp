@@ -52,7 +52,7 @@ private:
     static constexpr double MIN_Y{ 0. };
     static constexpr double MAX_Y{ static_cast<double>(AppParams::Canvas::HEIGHT) };
 
-    const Matrices::Matrix<3U, 3U> IDENTITY{ {1., 0., 0., 0., 1., 0., 0., 0., 1.} };
+    static constexpr Matrices::Matrix<3U, 3U> IDENTITY{ std::array<std::array<double, 3U>, 3U>{1., 0., 0., 0., 1., 0., 0., 0., 1.} };
 
     Matrices::Matrix<3U, 3U> cur_state{ IDENTITY };
     std::stack<Matrices::Matrix<3U, 3U>> transformations_chain;

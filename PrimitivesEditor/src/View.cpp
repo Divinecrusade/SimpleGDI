@@ -4,7 +4,19 @@
 
 View::~View() noexcept
 {
-    delete_objects(CANVAS_BORDER_PEN, RUBBER_LINE_PEN, SOLID_LINE_PEN, CANVAS_BACKGROUND_BRUSH, BTN_BACKGROUND_BRUSH, BTN_BORDER_BRUSH);
+    delete_objects
+    (
+        CANVAS_BORDER_PEN, 
+        RUBBER_LINE_PEN, 
+        SOLID_LINE_PEN, 
+        STROKE_RECTANGLE, 
+        STROKE_ELLIPSE, 
+        CANVAS_BACKGROUND_BRUSH, 
+        BTN_BACKGROUND_BRUSH, 
+        BTN_BORDER_BRUSH, 
+        FILL_RECTANGLE,
+        FILL_ELLIPSE
+    );
 }
 
 void View::update_context(HDC const& context) noexcept
@@ -29,7 +41,7 @@ void View::set_clipping() const noexcept
 
 void View::draw_stage() const noexcept
 {
-    SelectObject(cur_context, CANVAS_BORDER_PEN);
+    auto const OLD_PEN{ SelectPen(cur_context, CANVAS_BORDER_PEN) };
     Rectangle(cur_context, AppParams::Canvas::REGION.left, AppParams::Canvas::REGION.top, AppParams::Canvas::REGION.right, AppParams::Canvas::REGION.bottom);
     FillRect(cur_context, &AppParams::Canvas::REGION, CANVAS_BACKGROUND_BRUSH);
 
@@ -49,23 +61,25 @@ void View::draw_stage() const noexcept
             string_length
         );
     }
+
+    SelectPen(cur_context, OLD_PEN);
 }
 
 void View::draw_rubber_line(POINT const& beg, POINT const& end) const noexcept
 {
-    auto const OLD_OBJ{ SelectObject(cur_context, RUBBER_LINE_PEN) };
+    auto const OLD_OBJ{ SelectPen(cur_context, RUBBER_LINE_PEN) };
     auto const OLD_ROP{ GetROP2(cur_context) };
     SetROP2(cur_context, AppParams::RubberLine::ROP);
 
     draw_line(beg.x, beg.y, end.x, end.y);
 
     SetROP2(cur_context, OLD_ROP);
-    SelectObject(cur_context, OLD_OBJ);
+    SelectPen(cur_context, OLD_OBJ);
 }
 
 void View::draw_rubber_rect(POINT const& beg, POINT const& end) const noexcept
 {
-    auto const OLD_OBJ{ SelectObject(cur_context, RUBBER_LINE_PEN) };
+    auto const OLD_OBJ{ SelectPen(cur_context, RUBBER_LINE_PEN) };
     auto const OLD_ROP{ GetROP2(cur_context) };
     SetROP2(cur_context, AppParams::RubberLine::ROP);
 
@@ -75,19 +89,19 @@ void View::draw_rubber_rect(POINT const& beg, POINT const& end) const noexcept
     draw_line(beg.x, end.y, beg.x, beg.y);
 
     SetROP2(cur_context, OLD_ROP);
-    SelectObject(cur_context, OLD_OBJ);
+    SelectPen(cur_context, OLD_OBJ);
 }
 
 void View::draw_solid_line(POINT const& beg, POINT const& end) const noexcept
 {
-    auto const OLD_OBJ{ SelectObject(cur_context, SOLID_LINE_PEN) };
+    auto const OLD_OBJ{ SelectPen(cur_context, SOLID_LINE_PEN) };
     auto const OLD_ROP{ GetROP2(cur_context) };
     SetROP2(cur_context, AppParams::Line::ROP);
 
     draw_line(beg.x, beg.y, end.x, end.y);
 
     SetROP2(cur_context, OLD_ROP);
-    SelectObject(cur_context, OLD_OBJ);
+    SelectPen(cur_context, OLD_OBJ);
 }
 
 void View::draw_filled_rect(POINT const& leftTop, POINT const& rightBot) const noexcept

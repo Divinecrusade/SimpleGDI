@@ -3,8 +3,7 @@
 
 void Controller::draw_model() noexcept
 {
-    auto objects{ logic_space.get_objects() };
-    for (auto& obj : objects)
+    for (auto const& obj : logic_space.get_objects())
     {
         switch (obj.first)
         {
@@ -33,9 +32,9 @@ void Controller::draw_model() noexcept
 
 Controller& Controller::get_instance() noexcept
 {
-    static Controller instance_{};
+    static Controller instance{};
 
-    return instance_;
+    return instance;
 }
 
 LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, _In_ LPARAM lParam)
@@ -120,7 +119,8 @@ LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPA
 
         case WM_LBUTTONUP:
         {
-            if (instance.choosen_mode == FunMode::NONE) break;
+            if (instance.choosen_mode == FunMode::NONE || 
+                !is_contained(get_cursor_pos_on_window(lParam), AppParams::Canvas::REGION)) break;
 
             hdc = GetDC(hWnd);
 
@@ -129,8 +129,6 @@ LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPA
 
             if (instance.choosen_mode == FunMode::ZOOM) instance.renderer.draw_rubber_rect(instance.beg, instance.end);
             else instance.renderer.draw_rubber_line(instance.beg, instance.end);
-
-            if (!is_contained(get_cursor_pos_on_window(lParam), AppParams::Canvas::REGION)) break;
 
             switch (instance.choosen_mode)
             {

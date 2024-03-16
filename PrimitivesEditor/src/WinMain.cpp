@@ -90,12 +90,26 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
                     renderer.update_context(hdc);
                     renderer.set_clipping();
 
-                    renderer.draw_rubber_line(line_beg, line_end);
+                    if (choosen_mode == FunMode::ZOOM)
+                    {
+                        renderer.draw_rubber_rect(line_beg, line_end);
+                    }
+                    else
+                    {
+                        renderer.draw_rubber_line(line_beg, line_end);
+                    }
 
                     line_end = get_cursor_pos_on_window(lParam);
 
-                    renderer.draw_rubber_line(line_beg, line_end);
-
+                    if (choosen_mode == FunMode::ZOOM)
+                    {
+                        renderer.draw_rubber_rect(line_beg, line_end);
+                    }
+                    else
+                    {
+                        renderer.draw_rubber_line(line_beg, line_end);
+                    }
+                    
                     ReleaseDC(hWnd, hdc);
                 }
                 break;
@@ -114,7 +128,14 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
             renderer.update_context(hdc);
             renderer.set_clipping();
 
-            renderer.draw_rubber_line(line_beg, line_end);
+            if (choosen_mode == FunMode::ZOOM)
+            {
+                renderer.draw_rubber_rect(line_beg, line_end);
+            }
+            else
+            {
+                renderer.draw_rubber_line(line_beg, line_end);
+            }
 
             if (!is_contained(get_cursor_pos_on_window(lParam), AppParams::Canvas::REGION)) break;
 

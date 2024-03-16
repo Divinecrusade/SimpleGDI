@@ -22,6 +22,7 @@ public:
 
     void draw_stage() const noexcept;
     void draw_rubber_line   (POINT const& beg,     POINT const& end) const noexcept;
+    void draw_rubber_rect   (POINT const& beg,     POINT const& end) const noexcept;
     void draw_solid_line    (POINT const& beg,     POINT const& end) const noexcept;
     void draw_filled_rect   (POINT const& leftTop, POINT const& rightBot) const noexcept;
     void draw_filled_ellipse(POINT const& leftTop, POINT const& rightBot) const noexcept;

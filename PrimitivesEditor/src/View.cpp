@@ -63,6 +63,21 @@ void View::draw_rubber_line(POINT const& beg, POINT const& end) const noexcept
     SelectObject(cur_context, OLD_OBJ);
 }
 
+void View::draw_rubber_rect(POINT const& beg, POINT const& end) const noexcept
+{
+    auto const OLD_OBJ{ SelectObject(cur_context, RUBBER_LINE_PEN) };
+    auto const OLD_ROP{ GetROP2(cur_context) };
+    SetROP2(cur_context, AppParams::RubberLine::ROP);
+
+    draw_line(beg.x, beg.y, end.x, beg.y);
+    draw_line(end.x, beg.y, end.x, end.y);
+    draw_line(end.x, end.y, beg.x, end.y);
+    draw_line(beg.x, end.y, beg.x, beg.y);
+
+    SetROP2(cur_context, OLD_ROP);
+    SelectObject(cur_context, OLD_OBJ);
+}
+
 void View::draw_solid_line(POINT const& beg, POINT const& end) const noexcept
 {
     auto const OLD_OBJ{ SelectObject(cur_context, SOLID_LINE_PEN) };

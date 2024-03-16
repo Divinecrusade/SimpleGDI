@@ -15,31 +15,19 @@ public:
     HomogeneousCoordinate2D() = delete;
     HomogeneousCoordinate2D(double x, double y) noexcept
     :
-    point{ { x * w, y * w, w } },
-    X{ point[0][0] },
-    Y{ point[0][1] },
-    W{ point[0][2] }
+    point{ { x * w, y * w, w } }
     { }
     HomogeneousCoordinate2D(POINT const& coordinate) noexcept
     :
-    point{ { static_cast<double>(coordinate.x) * w, static_cast<double>(coordinate.y) * w, w } },
-    X{ point[0][0] },
-    Y{ point[0][1] },
-    W{ point[0][2] }
+    point{ { static_cast<double>(coordinate.x) * w, static_cast<double>(coordinate.y) * w, w } }
     { }
-    HomogeneousCoordinate2D(HomogeneousCoordinate2D const& coordinate) noexcept
-    :
-    point{ coordinate.point },
-    X{ point[0][0] },
-    Y{ point[0][1] },
-    W{ point[0][2] }
-    { }
-    HomogeneousCoordinate2D(HomogeneousCoordinate2D&&) noexcept = delete;
+    HomogeneousCoordinate2D(HomogeneousCoordinate2D const&) noexcept = default;
+    HomogeneousCoordinate2D(HomogeneousCoordinate2D&&) noexcept = default;
 
     HomogeneousCoordinate2D& operator=(POINT const& coordinate) noexcept
     {
-        point[0][0] = static_cast<double>(coordinate.x) * W;
-        point[0][1] = static_cast<double>(coordinate.y) * W;
+        point[0][0] = static_cast<double>(coordinate.x) * get_W();
+        point[0][1] = static_cast<double>(coordinate.y) * get_W();
 
         return *this;
     }
@@ -50,13 +38,13 @@ public:
 
         return *this;
     }
-    HomogeneousCoordinate2D& operator=(HomogeneousCoordinate2D&&) = delete;
+    HomogeneousCoordinate2D& operator=(HomogeneousCoordinate2D&&) = default;
 
-    ~HomogeneousCoordinate2D() = default;
+    ~HomogeneousCoordinate2D() noexcept = default;
 
     POINT convert() const noexcept
     {
-        return POINT{ static_cast<int>(X / W), static_cast<int>(Y / W) };
+        return POINT{ static_cast<int>(get_X() / get_W()), static_cast<int>(get_Y() / get_W()) };
     }
 
     HomogeneousCoordinate2D& transform(Matrices::Matrix<3U, 3U> const& affine) noexcept
@@ -71,6 +59,33 @@ public:
         return HomogeneousCoordinate2D{ *this }.transform(affine);
     }
 
+    double& get_X() noexcept
+    {
+        return point[0U][INDEX_X];
+    }
+    double get_X() const noexcept
+    {
+        return point[0U][INDEX_X];
+    }
+
+    double& get_Y() noexcept
+    {
+        return point[0U][INDEX_Y];
+    }
+    double get_Y() const noexcept
+    {
+        return point[0U][INDEX_Y];
+    }
+
+    double& get_W() noexcept
+    {
+        return point[0U][INDEX_W];
+    }
+    double get_W() const noexcept
+    {
+        return point[0U][INDEX_W];
+    }
+
     static HomogeneousCoordinate2D get_transformed(HomogeneousCoordinate2D const& coordinate, Matrices::Matrix<3U, 3U> const& affine) noexcept
     {
         return coordinate.get_transformed(affine);
@@ -78,13 +93,11 @@ public:
 
 private:
 
+    static constexpr size_t INDEX_X{ 0U };
+    static constexpr size_t INDEX_Y{ 1U };
+    static constexpr size_t INDEX_W{ 2U };
+
     Matrices::Matrix<1U, 3U> point;
-
-public:
-
-    double& X;
-    double& Y;
-    double const& W;
 };
 
 #endif // !HOMOGENEOUSCOORDINATE2D

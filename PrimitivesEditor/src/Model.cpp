@@ -50,12 +50,12 @@ HomogeneousCoordinate2D<CoordinateSystem::NDC> Model::normalize(HomogeneousCoord
 {
     auto tmp{ coordinate.get_transformed(!cur_state) };
 
-    return { tmp.X, tmp.Y };
+    return { tmp.get_X(), tmp.get_Y()};
 }
 
 HomogeneousCoordinate2D<CoordinateSystem::DC> Model::device(HomogeneousCoordinate2D<CoordinateSystem::NDC> const& coordinate) const noexcept
 {
     auto tmp{ coordinate.get_transformed(cur_state) };
 
-    return { tmp.X, tmp.Y };
+    return { tmp.get_X(), tmp.get_Y()};
 }

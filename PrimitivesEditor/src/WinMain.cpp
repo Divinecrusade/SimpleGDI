@@ -79,7 +79,7 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
 
         case WM_MOUSEMOVE:
         {
-            if (choosen_mode == FunMode::NONE) break;
+            if (choosen_mode == FunMode::NONE || choosen_mode == FunMode::UNZOOM) break;
 
             switch(wParam) 
             {
@@ -166,6 +166,8 @@ LRESULT CALLBACK WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, 
                 case FunMode::ZOOM:
                 {
                     RECT new_viewport{line_beg.x, line_beg.y, line_end.x, line_end.y};
+
+                    if (new_viewport.left == new_viewport.right || new_viewport.top == new_viewport.bottom) break;
 
                     logic_space.zoom(new_viewport);
                     renderer.clear_canvas();

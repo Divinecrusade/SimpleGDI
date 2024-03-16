@@ -40,7 +40,7 @@ Controller& Controller::get_instance() noexcept
 
 LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
-    static Controller& instance_{ Controller::get_instance() };
+    static Controller& instance{ Controller::get_instance() };
     static HDC hdc{ };
 
     switch (message)
@@ -50,8 +50,8 @@ LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPA
             PAINTSTRUCT ps{ };
             hdc = BeginPaint(hWnd, &ps);
 
-            instance_.renderer.update_context(hdc);
-            instance_.renderer.draw_stage();
+            instance.renderer.update_context(hdc);
+            instance.renderer.draw_stage();
 
             EndPaint(hWnd, &ps);
         }
@@ -61,7 +61,7 @@ LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPA
         {
             POINT const cursor_pos{ get_cursor_pos_on_window(lParam) };
 
-            instance_.beg = instance_.end = cursor_pos;
+            instance.beg = instance.end = cursor_pos;
 
             for (size_t i{ static_cast<size_t>(FunMode::LINE) }; i != static_cast<size_t>(FunMode::NONE); ++i)
             {
@@ -69,11 +69,11 @@ LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPA
                 {
                     hdc = GetDC(hWnd);
 
-                    instance_.renderer.update_context(hdc);
+                    instance.renderer.update_context(hdc);
 
-                    instance_.renderer.select_btn(i);
-                    instance_.renderer.unselect_btn(static_cast<size_t>(instance_.choosen_mode));
-                    instance_.choosen_mode = (i == static_cast<size_t>(instance_.choosen_mode) ? FunMode::NONE : static_cast<FunMode>(i));
+                    instance.renderer.select_btn(i);
+                    instance.renderer.unselect_btn(static_cast<size_t>(instance.choosen_mode));
+                    instance.choosen_mode = (i == static_cast<size_t>(instance.choosen_mode) ? FunMode::NONE : static_cast<FunMode>(i));
 
                     ReleaseDC(hWnd, hdc);
 
@@ -85,7 +85,7 @@ LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPA
 
         case WM_MOUSEMOVE:
         {
-            if (instance_.choosen_mode == FunMode::NONE || instance_.choosen_mode == FunMode::UNZOOM) break;
+            if (instance.choosen_mode == FunMode::NONE || instance.choosen_mode == FunMode::UNZOOM) break;
 
             switch (wParam)
             {
@@ -93,16 +93,21 @@ LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPA
                 {
                     hdc = GetDC(hWnd);
 
-                    instance_.renderer.update_context(hdc);
-                    instance_.renderer.set_clipping();
+                    instance.renderer.update_context(hdc);
+                    instance.renderer.set_clipping();
 
-                    if (instance_.choosen_mode == FunMode::ZOOM) instance_.renderer.draw_rubber_rect(instance_.beg, instance_.end);
-                    else instance_.renderer.draw_rubber_line(instance_.beg, instance_.end);
+                    auto const old_end{ std::exchange(instance.end, get_cursor_pos_on_window(lParam)) };
 
-                    instance_.end = get_cursor_pos_on_window(lParam);
-
-                    if (instance_.choosen_mode == FunMode::ZOOM) instance_.renderer.draw_rubber_rect(instance_.beg, instance_.end);
-                    else instance_.renderer.draw_rubber_line(instance_.beg, instance_.end);
+                    if (instance.choosen_mode == FunMode::ZOOM) 
+                    {
+                        instance.renderer.draw_rubber_rect(instance.beg, old_end);
+                        instance.renderer.draw_rubber_rect(instance.beg, instance.end);
+                    }
+                    else 
+                    {
+                        instance.renderer.draw_rubber_line(instance.beg, old_end);
+                        instance.renderer.draw_rubber_line(instance.beg, instance.end);
+                    }
 
                     ReleaseDC(hWnd, hdc);
                 }
@@ -115,58 +120,58 @@ LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPA
 
         case WM_LBUTTONUP:
         {
-            if (instance_.choosen_mode == FunMode::NONE) break;
+            if (instance.choosen_mode == FunMode::NONE) break;
 
             hdc = GetDC(hWnd);
 
-            instance_.renderer.update_context(hdc);
-            instance_.renderer.set_clipping();
+            instance.renderer.update_context(hdc);
+            instance.renderer.set_clipping();
 
-            if (instance_.choosen_mode == FunMode::ZOOM) instance_.renderer.draw_rubber_rect(instance_.beg, instance_.end);
-            else instance_.renderer.draw_rubber_line(instance_.beg, instance_.end);
+            if (instance.choosen_mode == FunMode::ZOOM) instance.renderer.draw_rubber_rect(instance.beg, instance.end);
+            else instance.renderer.draw_rubber_line(instance.beg, instance.end);
 
             if (!is_contained(get_cursor_pos_on_window(lParam), AppParams::Canvas::REGION)) break;
 
-            switch (instance_.choosen_mode)
+            switch (instance.choosen_mode)
             {
                 case FunMode::LINE:
                 {
-                    instance_.renderer.draw_solid_line(instance_.beg, instance_.end);
-                    instance_.logic_space.add_object(Model::TypeOfPrimitive::LINE, instance_.beg, instance_.end);
+                    instance.renderer.draw_solid_line(instance.beg, instance.end);
+                    instance.logic_space.add_object(Model::TypeOfPrimitive::LINE, instance.beg, instance.end);
                 }
                 break;
 
                 case FunMode::RECTANGLE:
                 {
-                    instance_.renderer.draw_filled_rect(instance_.beg, instance_.end);
-                    instance_.logic_space.add_object(Model::TypeOfPrimitive::RECTANGLE, instance_.beg, instance_.end);
+                    instance.renderer.draw_filled_rect(instance.beg, instance.end);
+                    instance.logic_space.add_object(Model::TypeOfPrimitive::RECTANGLE, instance.beg, instance.end);
                 }
                 break;
 
                 case FunMode::ELLIPSE:
                 {
-                    instance_.renderer.draw_filled_ellipse(instance_.beg, instance_.end);
-                    instance_.logic_space.add_object(Model::TypeOfPrimitive::ELLIPSE, instance_.beg, instance_.end);
+                    instance.renderer.draw_filled_ellipse(instance.beg, instance.end);
+                    instance.logic_space.add_object(Model::TypeOfPrimitive::ELLIPSE, instance.beg, instance.end);
                 }
                 break;
 
                 case FunMode::ZOOM:
                 {
-                    RECT new_viewport{ instance_.beg.x, instance_.beg.y, instance_.end.x, instance_.end.y };
+                    RECT new_viewport{ instance.beg.x, instance.beg.y, instance.end.x, instance.end.y };
 
                     if (new_viewport.left == new_viewport.right || new_viewport.top == new_viewport.bottom) break;
 
-                    instance_.logic_space.zoom(new_viewport);
-                    instance_.renderer.clear_canvas();
-                    instance_.draw_model();
+                    instance.logic_space.zoom(new_viewport);
+                    instance.renderer.clear_canvas();
+                    instance.draw_model();
                 }
                 break;
 
                 case FunMode::UNZOOM:
                 {
-                    instance_.logic_space.unzoom();
-                    instance_.renderer.clear_canvas();
-                    instance_.draw_model();
+                    instance.logic_space.unzoom();
+                    instance.renderer.clear_canvas();
+                    instance.draw_model();
                 }
                 break;
 

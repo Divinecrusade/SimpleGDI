@@ -38,26 +38,20 @@ public:
 
 private:
 
-    HomogeneousCoordinate2D<CoordinateSystem::NDC> normalize(HomogeneousCoordinate2D<CoordinateSystem::DC> const& coordinate) const noexcept;
+    HomogeneousCoordinate2D<CoordinateSystem::WC> world(HomogeneousCoordinate2D<CoordinateSystem::DC> const& coordinate) const noexcept;
 
-    HomogeneousCoordinate2D<CoordinateSystem::DC>  device(HomogeneousCoordinate2D<CoordinateSystem::NDC> const& coordinate) const noexcept;
+    HomogeneousCoordinate2D<CoordinateSystem::DC> device(HomogeneousCoordinate2D<CoordinateSystem::WC> const& coordinate) const noexcept;
 
 private:
     
     static constexpr RECT VIEWPORT{ AppParams::Canvas::REGION };
-
-    static constexpr double MIN_X{ 0. };
-    static constexpr double MAX_X{ static_cast<double>(AppParams::Canvas::WIDTH) };
-
-    static constexpr double MIN_Y{ 0. };
-    static constexpr double MAX_Y{ static_cast<double>(AppParams::Canvas::HEIGHT) };
 
     static constexpr Matrices::Matrix<3U, 3U> IDENTITY{ std::array<std::array<double, 3U>, 3U>{1., 0., 0., 0., 1., 0., 0., 0., 1.} };
 
     Matrices::Matrix<3U, 3U> cur_state{ IDENTITY };
     std::stack<Matrices::Matrix<3U, 3U>> transformations_chain;
 
-    std::vector<std::pair<TypeOfPrimitive, std::array<HomogeneousCoordinate2D<CoordinateSystem::NDC>, 2U>>> objects;
+    std::vector<std::pair<TypeOfPrimitive, std::array<HomogeneousCoordinate2D<CoordinateSystem::WC>, 2U>>> objects;
 };
 
 

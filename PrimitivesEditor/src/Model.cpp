@@ -31,7 +31,7 @@ void Model::unzoom() noexcept
 
 void Model::add_object(TypeOfPrimitive type, HomogeneousCoordinate2D<CoordinateSystem::DC> const& beg, HomogeneousCoordinate2D<CoordinateSystem::DC> const& end) noexcept
 {
-    objects.emplace_back(type, std::array<HomogeneousCoordinate2D<CoordinateSystem::NDC>, 2U>{ normalize(beg), normalize(end) });
+    objects.emplace_back(type, std::array<HomogeneousCoordinate2D<CoordinateSystem::WC>, 2U>{ world(beg), world(end) });
 }
 
 std::vector<std::pair<Model::TypeOfPrimitive, std::array<HomogeneousCoordinate2D<CoordinateSystem::DC>, 2U>>> Model::get_objects() const noexcept
@@ -53,14 +53,14 @@ std::vector<std::pair<Model::TypeOfPrimitive, std::array<HomogeneousCoordinate2D
     return render_objects;
 }
 
-HomogeneousCoordinate2D<CoordinateSystem::NDC> Model::normalize(HomogeneousCoordinate2D<CoordinateSystem::DC> const& coordinate) const noexcept
+HomogeneousCoordinate2D<CoordinateSystem::WC> Model::world(HomogeneousCoordinate2D<CoordinateSystem::DC> const& coordinate) const noexcept
 {
     auto const tmp{ coordinate.get_transformed(!cur_state) };
 
     return { tmp.get_X(), tmp.get_Y() };
 }
 
-HomogeneousCoordinate2D<CoordinateSystem::DC> Model::device(HomogeneousCoordinate2D<CoordinateSystem::NDC> const& coordinate) const noexcept
+HomogeneousCoordinate2D<CoordinateSystem::DC> Model::device(HomogeneousCoordinate2D<CoordinateSystem::WC> const& coordinate) const noexcept
 {
     auto const tmp{ coordinate.get_transformed(cur_state) };
 

@@ -9,7 +9,7 @@ void Model::zoom(RECT const& window) noexcept
     double const Tx{ min(VIEWPORT.left, VIEWPORT.right) - Sx * min(window.left, window.right) };
     double const Ty{ min(VIEWPORT.bottom, VIEWPORT.top) - Sy * min(window.bottom, window.top) };
 
-    Matrices::Matrix<3U, 3U> transformation
+    Matrices::Matrix<3U, 3U> const transformation
     {
         {
             Sx, 0., 0.,
@@ -27,6 +27,22 @@ void Model::unzoom() noexcept
 
     cur_state *= !transformations_chain.top();
     transformations_chain.pop();
+}
+
+void Model::translate(HomogeneousCoordinate2D<CoordinateSystem::DC> const& beg, HomogeneousCoordinate2D<CoordinateSystem::DC> const& end) noexcept
+{
+    double const Tx{ end.get_X() - beg.get_X() };
+    double const Ty{ end.get_Y() - beg.get_X() };
+
+    Matrices::Matrix<3U, 3U> const transformation
+    {
+        {
+            1., 0., 0.,
+            0., 1., 0.,
+            Tx, Ty, 1.
+        }
+    };
+    cur_state *= transformation;
 }
 
 void Model::add_object(TypeOfPrimitive type, HomogeneousCoordinate2D<CoordinateSystem::DC> const& beg, HomogeneousCoordinate2D<CoordinateSystem::DC> const& end) noexcept

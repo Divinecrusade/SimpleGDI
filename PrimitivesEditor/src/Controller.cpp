@@ -127,7 +127,7 @@ LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPA
             instance.renderer.update_context(hdc);
             instance.renderer.set_clipping();
 
-            if (instance.choosen_mode == FunMode::ZOOM) instance.renderer.draw_rubber_rect(instance.beg, instance.end);
+            if (instance.choosen_mode == FunMode::ZOOM || instance.choosen_mode == FunMode::TRANSLATE) instance.renderer.draw_rubber_rect(instance.beg, instance.end);
             else instance.renderer.draw_rubber_line(instance.beg, instance.end);
 
             switch (instance.choosen_mode)
@@ -172,6 +172,13 @@ LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPA
                     instance.draw_model();
                 }
                 break;
+
+                case FunMode::TRANSLATE:
+                {
+                    instance.logic_space.translate(instance.beg, instance.end);
+                    instance.renderer.clear_canvas();
+                    instance.draw_model();
+                }
 
                 default: return DefWindowProcW(hWnd, message, wParam, lParam); break;
             }

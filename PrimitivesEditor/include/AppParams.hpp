@@ -89,9 +89,9 @@ namespace AppParams
     namespace Button
     {
         static constexpr auto BACKGROUND_COLOR{ RGB(255, 255, 255) };
-        static constexpr int  WIDTH { 100 };
+        static constexpr int  WIDTH { 90 };
         static constexpr int  HEIGHT{ 80 };
-        static constexpr int  N{ 5 };
+        static constexpr int  N{ 6 };
         static constexpr int  Y_MARGIN{ (Menu::HEIGHT - HEIGHT) / 2 };
         static constexpr int  X_MARGIN{ (Menu::WIDTH  - WIDTH * N) / (N - 1) };
 
@@ -114,7 +114,7 @@ namespace AppParams
         }
 
         static constexpr std::array<RECT, N> REGIONS{ get_btn_regions() };
-        static constexpr std::array<wchar_t const* const, N> TEXTS{ L"line", L"rectangle", L"ellipse", L"zoom", L"unzoom"};
+        static constexpr std::array<wchar_t const* const, N> TEXTS{ L"line", L"rectangle", L"ellipse", L"zoom", L"unzoom", L"translate"};
         
         static constexpr auto BORDER_COLOR{ RGB(255, 0, 0) };
         static constexpr int  BORDER_WIDTH{ 1 };
@@ -142,6 +142,11 @@ namespace AppParams
         namespace ChooseUnzoom
         {
             static constexpr size_t I{ 4U };
+        }
+
+        namespace ChooseTranslate
+        {
+            static constexpr size_t I{ 5U };
         }
     }
 }

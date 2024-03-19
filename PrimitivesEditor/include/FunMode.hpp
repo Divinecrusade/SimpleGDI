@@ -11,6 +11,7 @@ enum class FunMode : size_t
     ELLIPSE = AppParams::Button::ChooseEllipse::I,
     ZOOM = AppParams::Button::ChooseZoom::I,
     UNZOOM = AppParams::Button::ChooseUnzoom::I,
+    TRANSLATE = AppParams::Button::ChooseTranslate::I,
     NONE
 };
 

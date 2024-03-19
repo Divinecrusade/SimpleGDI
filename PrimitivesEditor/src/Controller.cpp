@@ -187,6 +187,23 @@ LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPA
         }
         break;
 
+        case WM_RBUTTONUP:
+        {
+            POINT const cursor_pos{ get_cursor_pos_on_window(lParam) };
+
+            if (wParam == VK_LBUTTON || !is_contained(cursor_pos, AppParams::Canvas::REGION)) break;
+
+            HomogeneousCoordinate2D<CoordinateSystem::DC> const left_top{ static_cast<double>(cursor_pos.x) - instance.COLLISION_PADDING_MOUSE.get_X(), static_cast<double>(cursor_pos.y) - instance.COLLISION_PADDING_MOUSE.get_Y() };
+            HomogeneousCoordinate2D<CoordinateSystem::DC> const right_bottom{ static_cast<double>(cursor_pos.x) + instance.COLLISION_PADDING_MOUSE.get_X(), static_cast<double>(cursor_pos.y) + instance.COLLISION_PADDING_MOUSE.get_Y() };
+            instance.logic_space.delete_object(left_top, right_bottom);
+            
+            hdc = GetDC(hWnd);
+            instance.renderer.update_context(hdc);
+            instance.renderer.clear_canvas();
+            instance.draw_model();
+        }
+        break;
+
         case WM_DESTROY: PostQuitMessage(EXIT_SUCCESS); break;
         default: return DefWindowProcW(hWnd, message, wParam, lParam); break;
     }

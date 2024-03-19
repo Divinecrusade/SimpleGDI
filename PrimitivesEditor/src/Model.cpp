@@ -32,7 +32,7 @@ void Model::unzoom() noexcept
 void Model::translate(HomogeneousCoordinate2D<CoordinateSystem::DC> const& beg, HomogeneousCoordinate2D<CoordinateSystem::DC> const& end) noexcept
 {
     double const Tx{ end.get_X() - beg.get_X() };
-    double const Ty{ end.get_Y() - beg.get_X() };
+    double const Ty{ end.get_Y() - beg.get_Y() };
 
     Matrices::Matrix<3U, 3U> const transformation
     {
@@ -48,6 +48,25 @@ void Model::translate(HomogeneousCoordinate2D<CoordinateSystem::DC> const& beg, 
 void Model::add_object(TypeOfPrimitive type, HomogeneousCoordinate2D<CoordinateSystem::DC> const& beg, HomogeneousCoordinate2D<CoordinateSystem::DC> const& end) noexcept
 {
     objects.emplace_back(type, std::array<HomogeneousCoordinate2D<CoordinateSystem::WC>, 2U>{ world(beg), world(end) });
+}
+
+void Model::delete_object(HomogeneousCoordinate2D<CoordinateSystem::DC> const& beg, HomogeneousCoordinate2D<CoordinateSystem::DC> const& end) noexcept
+{
+    auto beg_{ world(beg) };
+    auto end_{ world(end) };
+
+    auto it{ objects.rbegin() };
+    for (; it != objects.rend(); ++it)
+    {
+        if ((it->second[0U].get_X() > beg.get_X() && it->second[0U].get_X() < end.get_X() &&
+            it->second[0U].get_Y() > beg.get_Y() && it->second[0U].get_Y() < end.get_Y()) ||
+            (it->second[1U].get_X() > beg.get_X() && it->second[1U].get_X() < end.get_X() &&
+                it->second[1U].get_Y() > beg.get_Y() && it->second[1U].get_Y() < end.get_Y()))
+        {
+            break;
+        }
+    }
+    if (it != objects.rend()) objects.erase(std::prev(it.base()));
 }
 
 std::vector<std::pair<Model::TypeOfPrimitive, std::array<HomogeneousCoordinate2D<CoordinateSystem::DC>, 2U>>> Model::get_objects() const noexcept

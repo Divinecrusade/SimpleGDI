@@ -40,6 +40,8 @@ public:
 
 private:
 
+    HomogeneousCoordinate2D<CoordinateSystem::DC> const COLLISION_PADDING_MOUSE{ 10., 10. };
+
     POINT beg{ };
     POINT end{ };
     FunMode choosen_mode{ FunMode::NONE };

@@ -50,22 +50,49 @@ void Model::add_object(TypeOfPrimitive type, HomogeneousCoordinate2D<CoordinateS
     objects.emplace_back(type, std::array<HomogeneousCoordinate2D<CoordinateSystem::WC>, 2U>{ world(beg), world(end) });
 }
 
-void Model::delete_object(HomogeneousCoordinate2D<CoordinateSystem::DC> const& beg, HomogeneousCoordinate2D<CoordinateSystem::DC> const& end) noexcept
+void Model::delete_object(HomogeneousCoordinate2D<CoordinateSystem::DC> const& beg, HomogeneousCoordinate2D<CoordinateSystem::DC> const& end, HomogeneousCoordinate2D<CoordinateSystem::DC> const& center) noexcept
 {
     auto beg_{ world(beg) };
     auto end_{ world(end) };
+    auto center_{ world(center) };
 
     auto it{ objects.rbegin() };
     for (; it != objects.rend(); ++it)
     {
-        if ((it->second[0U].get_X() > beg.get_X() && it->second[0U].get_X() < end.get_X() &&
-            it->second[0U].get_Y() > beg.get_Y() && it->second[0U].get_Y() < end.get_Y()) ||
-            (it->second[1U].get_X() > beg.get_X() && it->second[1U].get_X() < end.get_X() &&
-                it->second[1U].get_Y() > beg.get_Y() && it->second[1U].get_Y() < end.get_Y()))
+        switch (it->first)
         {
+            case TypeOfPrimitive::LINE: 
+            {
+                if ((it->second[0U].get_X() > beg_.get_X() && it->second[0U].get_X() < end_.get_X() &&
+                    it->second[0U].get_Y() > beg_.get_Y() && it->second[0U].get_Y() < end_.get_Y()) ||
+                    (it->second[1U].get_X() > beg_.get_X() && it->second[1U].get_X() < end_.get_X() &&
+                    it->second[1U].get_Y() > beg_.get_Y() && it->second[1U].get_Y() < end_.get_Y()))
+                {
+                    goto OUT_LOOP;
+                }
+            }
             break;
+            
+            case TypeOfPrimitive::RECTANGLE: 
+            {
+                //HomogeneousCoordinate2D<CoordinateSystem::WC> const center{ beg_.get_X() + (end_.get_X() - beg_.get_X()) / 2., beg_.get_Y() + (end_.get_Y() - beg_.get_Y()) / 2. };
+                double const left{ min(it->second[0U].get_X(), it->second[1U].get_X()) };
+                double const right{ max(it->second[0U].get_X(), it->second[1U].get_X())};
+                double const bottom{ min(it->second[0U].get_Y(), it->second[0U].get_Y()) };
+                double const top{ max(it->second[0U].get_Y(), it->second[1U].get_Y()) };
+
+                if (center_.get_X() > left && center_.get_X() < right && center_.get_Y() < top && center_.get_Y() > bottom)
+                {
+                    goto OUT_LOOP;
+                }
+            }
+            break;
+            
+            default: break;
         }
+
     }
+OUT_LOOP:
     if (it != objects.rend()) objects.erase(std::prev(it.base()));
 }
 

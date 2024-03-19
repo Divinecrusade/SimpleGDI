@@ -195,10 +195,11 @@ LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPA
 
             HomogeneousCoordinate2D<CoordinateSystem::DC> const left_top{ static_cast<double>(cursor_pos.x) - instance.COLLISION_PADDING_MOUSE.get_X(), static_cast<double>(cursor_pos.y) - instance.COLLISION_PADDING_MOUSE.get_Y() };
             HomogeneousCoordinate2D<CoordinateSystem::DC> const right_bottom{ static_cast<double>(cursor_pos.x) + instance.COLLISION_PADDING_MOUSE.get_X(), static_cast<double>(cursor_pos.y) + instance.COLLISION_PADDING_MOUSE.get_Y() };
-            instance.logic_space.delete_object(left_top, right_bottom);
+            instance.logic_space.delete_object(left_top, right_bottom, HomogeneousCoordinate2D<CoordinateSystem::DC>{cursor_pos});
             
             hdc = GetDC(hWnd);
             instance.renderer.update_context(hdc);
+            instance.renderer.set_clipping();
             instance.renderer.clear_canvas();
             instance.draw_model();
         }

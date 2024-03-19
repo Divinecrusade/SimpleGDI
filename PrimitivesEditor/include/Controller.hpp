@@ -20,6 +20,15 @@ private:
         return pos.x >= frame.left && pos.x <= frame.right && pos.y >= frame.top && pos.y <= frame.bottom;
     }
 
+    __forceinline static POINT form_square(POINT const& beg, POINT const& end)
+    {
+        auto const width{ max(beg.x, end.x) - min(beg.x, end.x) };
+        auto const height{ max(beg.y, end.y) - min(beg.y, end.y) };
+        auto const sqr_length{ min(width, height) };
+
+        return POINT{ (beg.x < end.x ? beg.x + sqr_length : beg.x - sqr_length), (beg.y < end.y ? beg.y + sqr_length : beg.y - sqr_length) };
+    }
+
     Controller() noexcept = default;
 
     void draw_model() noexcept;

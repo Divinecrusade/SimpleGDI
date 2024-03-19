@@ -99,8 +99,8 @@ LRESULT CALLBACK Controller::WndProc(_In_ HWND hWnd, _In_ UINT message, _In_ WPA
 
                     if (instance.choosen_mode == FunMode::ZOOM) 
                     {
-                        instance.renderer.draw_rubber_rect(instance.beg, old_end);
-                        instance.renderer.draw_rubber_rect(instance.beg, instance.end);
+                        instance.renderer.draw_rubber_rect(instance.beg, form_square(instance.beg, old_end));
+                        instance.renderer.draw_rubber_rect(instance.beg, form_square(instance.beg, instance.end));
                     }
                     else 
                     {

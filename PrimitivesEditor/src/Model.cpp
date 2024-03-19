@@ -78,7 +78,7 @@ void Model::delete_object(HomogeneousCoordinate2D<CoordinateSystem::DC> const& b
                 //HomogeneousCoordinate2D<CoordinateSystem::WC> const center{ beg_.get_X() + (end_.get_X() - beg_.get_X()) / 2., beg_.get_Y() + (end_.get_Y() - beg_.get_Y()) / 2. };
                 double const left{ min(it->second[0U].get_X(), it->second[1U].get_X()) };
                 double const right{ max(it->second[0U].get_X(), it->second[1U].get_X())};
-                double const bottom{ min(it->second[0U].get_Y(), it->second[0U].get_Y()) };
+                double const bottom{ min(it->second[0U].get_Y(), it->second[1U].get_Y()) };
                 double const top{ max(it->second[0U].get_Y(), it->second[1U].get_Y()) };
 
                 if (center_.get_X() > left && center_.get_X() < right && center_.get_Y() < top && center_.get_Y() > bottom)

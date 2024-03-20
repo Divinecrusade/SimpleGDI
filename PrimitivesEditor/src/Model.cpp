@@ -47,14 +47,14 @@ void Model::translate(HomogeneousCoordinate2D<CoordinateSystem::DC> const& beg, 
 
 void Model::add_object(TypeOfPrimitive type, HomogeneousCoordinate2D<CoordinateSystem::DC> const& beg, HomogeneousCoordinate2D<CoordinateSystem::DC> const& end) noexcept
 {
-    objects.emplace_back(type, std::array<HomogeneousCoordinate2D<CoordinateSystem::WC>, 2U>{ world(beg), world(end) });
+    objects.emplace_back(type, std::array<HomogeneousCoordinate2D<CoordinateSystem::NDC>, 2U>{ normalize(beg), normalize(end) });
 }
 
 void Model::delete_object(HomogeneousCoordinate2D<CoordinateSystem::DC> const& beg, HomogeneousCoordinate2D<CoordinateSystem::DC> const& end, HomogeneousCoordinate2D<CoordinateSystem::DC> const& center) noexcept
 {
-    auto beg_{ world(beg) };
-    auto end_{ world(end) };
-    auto center_{ world(center) };
+    auto const beg_{ normalize(beg) };
+    auto const end_{ normalize(end) };
+    auto const center_{ normalize(center) };
 
     auto it{ objects.rbegin() };
     for (; it != objects.rend(); ++it)
@@ -115,16 +115,18 @@ std::vector<std::pair<Model::TypeOfPrimitive, std::array<HomogeneousCoordinate2D
     return render_objects;
 }
 
-HomogeneousCoordinate2D<CoordinateSystem::WC> Model::world(HomogeneousCoordinate2D<CoordinateSystem::DC> const& coordinate) const noexcept
+HomogeneousCoordinate2D<CoordinateSystem::NDC> Model::normalize(HomogeneousCoordinate2D<CoordinateSystem::DC> const& coordinate) const noexcept
 {
-    auto const tmp{ coordinate.get_transformed(!cur_state) };
+    HomogeneousCoordinate2D<CoordinateSystem::NDC> tmp{ coordinate.get_X() / MAX_X, coordinate.get_Y() / MAX_Y };
+    tmp.transform(!cur_state);
 
     return { tmp.get_X(), tmp.get_Y() };
 }
 
-HomogeneousCoordinate2D<CoordinateSystem::DC> Model::device(HomogeneousCoordinate2D<CoordinateSystem::WC> const& coordinate) const noexcept
+HomogeneousCoordinate2D<CoordinateSystem::DC> Model::device(HomogeneousCoordinate2D<CoordinateSystem::NDC> const& coordinate) const noexcept
 {
-    auto const tmp{ coordinate.get_transformed(cur_state) };
+    HomogeneousCoordinate2D<CoordinateSystem::NDC> tmp{ coordinate.get_X() * MAX_X, coordinate.get_Y() * MAX_Y };
+    tmp.transform(cur_state);
 
     return { tmp.get_X(), tmp.get_Y()};
 }
